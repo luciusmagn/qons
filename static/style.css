@@ -1,0 +1,32 @@
+/* Layout */
+.container { }
+main { }
+
+/* Question List */
+.questions { }
+.question {
+   transition: all 0.2s ease-out;
+}
+
+/* HTMX Animations */
+.htmx-swapping .question {
+   opacity: 0;
+   transform: translateX(-10px);
+}
+
+/* Forms */
+textarea { }
+input { }
+button { }
+
+/* Question Components */
+.upvote { }
+.delete { }
+
+/* Typography */
+h1 { }
+p { }
+small { }
+
+/* Admin Elements */
+.admin-controls { }
