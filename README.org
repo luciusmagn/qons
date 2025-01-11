@@ -232,3 +232,4 @@ CREATE TABLE vote (
  - author: optional, length limit 50
 - Admin tokens never exposed in normal operation
 - Cookies marked HttpOnly
+- Remember that all we have available is HTTP 1.1 - no SSEs, no Websocket no gnothing! But we must make the question loading showing dynamic
