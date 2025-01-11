@@ -4,31 +4,26 @@
         :std/cli/getopt
         :lho/shsx/lib
         :lho/smart-httpd/lib
-        ./lib)
+        ./lib
+        ./http)
 (export main)
 
 ;; build manifest; generated during the build
-;; defines version-manifest which you can use for exact versioning
 (include "../manifest.ss")
+
+(def (qons-main opt)
+  (let ((port (hash-ref opt 'port "8080"))
+        (host (hash-ref opt 'host "127.0.0.1")))
+    (displayln "Starting QONS on " host ":" port)
+    (run-api port host)))
 
 (def (main . args)
   (call-with-getopt qons-main args
                     program: "qons"
-                    help: "A one line description of your program"))
-;; commands/options/flags for your program; see :std/cli/getopt
-;; ...
-
-
-(def* qons-main
-  ((opt)
-   (qons-main/options opt))
-  ((cmd opt)
-   (qons-main/command cmd opt)))
-
-;;; Implement this if your CLI doesn't have commands
-(def (qons-main/options opt)
-  (error "Implement me!"))
-
-;;; Implement this if your CLI has commands
-(def (qons-main/command cmd opt)
-  (error "Implement me!"))
+                    help: "QONS - Question Room Server"
+                    (option 'port "-p" "--port"
+                            help: "Port to listen on"
+                            default: "8080")
+                    (option 'host "-h" "--host"
+                            help: "Host address to bind to"
+                            default: "127.0.0.1")))

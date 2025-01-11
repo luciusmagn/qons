@@ -61,11 +61,12 @@
          hx-trigger: "every 2s, questionAdded from:body"
          hx-swap: "outerHTML swap:*"
          class: "questions"
-         ,(@begin
-            ,@(map (match <>
-                     ((list q votes is-admin?)
-                      (question-item (room-id room) q votes is-admin?)))
-                   questions-with-votes)))))
+         ,@(map (lambda (qvi)
+                  (question-item (room-id room)
+                                 (car qvi)    ; question
+                                 (cadr qvi)   ; votes
+                                 (caddr qvi))) ; is-admin?
+                questions-with-votes))))
 
 ;; Single question item
 (def (question-item room-id q votes is-admin?)

@@ -1,6 +1,7 @@
 ;;; -*- Gerbil -*-
 (import :std/error
-        :std/sugar)
+        :std/sugar
+        :std/srfi/9)
 (export #t)
 
 (define-record-type <room>
