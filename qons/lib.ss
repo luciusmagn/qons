@@ -26,3 +26,5 @@
   (session-id  vote-session-id)
   (question-id vote-question-id)
   (created-at  vote-created-at))
+
+;; methods are in db.ss
