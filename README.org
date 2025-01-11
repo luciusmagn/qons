@@ -1,0 +1,234 @@
+* QONS - Shameless Sli.do clone
+
+** Data Types
+*** Core Types
+#+begin_src
+Room:
+ id: Int          # randomly generated
+ admin_token: Str # randomly generated
+ created_at: Time
+
+Question:
+ id: Int
+ room_id: Int     # foreign key to Room
+ text: Str
+ author: Maybe Str
+ created_at: Time
+
+Vote:
+ session_id: Str  # from cookie
+ question_id: Int # foreign key to Question
+ created_at: Time
+#+end_src
+
+** API Endpoints
+*** Core
+- GET  /                       ; index, sets session_id cookie
+- POST /r                      ; create room -> redirect to admin URL
+- GET  /r/:id                    ; view room
+- GET  /r/:id/:admin_token       ; admin access -> redirect + set admin cookie
+
+*** HTMX Operations
+- GET  /r/:id/questions          ; get sorted list (2s polling)
+- POST /r/:id/questions          ; submit question
+- DELETE /r/:id/questions/:qid   ; admin delete question
+- POST /r/:id/questions/:qid/up  ; upvote
+- DELETE /r/:id                  ; admin delete room
+
+** SQL Queries
+*** Room Operations
+#+begin_src sql
+-- Create new room
+INSERT INTO room (id, admin_token, created_at)
+VALUES (?, ?, NOW());
+
+-- Check if room exists + verify admin token
+SELECT id, admin_token FROM room
+WHERE id = ?;
+
+-- Delete room (admin only)
+DELETE FROM room WHERE id = ? AND admin_token = ?;
+#+end_src
+
+*** Question Operations
+#+begin_src sql
+-- Add new question
+INSERT INTO question (room_id, text, author, created_at)
+VALUES (?, ?, ?, NOW());
+
+-- Get questions for display/polling
+-- Returns questions with vote count and whether current user voted
+SELECT q.*,
+      COUNT(v.question_id) as votes,
+      EXISTS(
+        SELECT 1 FROM vote
+        WHERE question_id = q.id
+        AND session_id = ?
+      ) as voted_by_user
+FROM question q
+LEFT JOIN vote v ON v.question_id = q.id
+WHERE q.room_id = ?
+GROUP BY q.id
+ORDER BY votes DESC, created_at DESC;
+
+-- Delete question (admin only)
+DELETE FROM question
+WHERE id = ?
+AND room_id = ?;
+#+end_src
+
+*** Vote Operations
+#+begin_src sql
+-- Record user's vote
+INSERT INTO vote (session_id, question_id, created_at)
+VALUES (?, ?, NOW());
+#+end_src
+
+** Database Schema
+*** Tables
+**** room
+#+begin_src sql
+CREATE TABLE room (
+   id INTEGER PRIMARY KEY,
+   admin_token TEXT NOT NULL,
+   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+#+end_src
+
+**** question
+#+begin_src sql
+CREATE TABLE question (
+   id INTEGER PRIMARY KEY AUTOINCREMENT,
+   room_id INTEGER NOT NULL,
+   text TEXT NOT NULL,
+   author TEXT,
+   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   FOREIGN KEY (room_id) REFERENCES room(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_question_room ON question(room_id);
+#+end_src
+
+**** vote
+#+begin_src sql
+CREATE TABLE vote (
+   session_id TEXT NOT NULL,
+   question_id INTEGER NOT NULL,
+   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   PRIMARY KEY (session_id, question_id),
+   FOREIGN KEY (question_id) REFERENCES question(id) ON DELETE CASCADE
+);
+#+end_src
+
+** Cookies
+*** session_id
+- Format: UUID v4
+- Set on first visit
+- Used for vote tracking
+- HttpOnly
+
+*** admin_rooms
+- Format: JSON {room_id: admin_token}
+- Set when accessing admin URL
+- Used for admin operations
+- HttpOnly
+
+** Frontend Templates
+*** index.html
+#+begin_src html
+<main>
+ <h1>Question Room</h1>
+
+ <!-- Create room -->
+ <form hx-post="/r" hx-swap="none">
+   <button>Create New Room</button>
+ </form>
+
+ <!-- Join room -->
+ <form hx-get="/r/${roomId}"
+       hx-trigger="submit"
+       hx-target="body"
+       hx-push-url="true">
+   <input type="text"
+          name="roomId"
+          placeholder="Enter room code"
+          pattern="[0-9]+"
+          required>
+   <button>Join Room</button>
+ </form>
+</main>
+#+end_src
+
+*** room.html
+#+begin_src html
+<main>
+ <h1>Room #<span id="room-id"></span></h1>
+
+ <form hx-post="/r/{id}/questions"
+       hx-swap="none"
+       hx-target="#questions">
+   <textarea name="text" required></textarea>
+   <input type="text" name="author" placeholder="Name (optional)">
+   <button>Ask</button>
+ </form>
+
+ <div id="questions"
+      hx-get="/r/{id}/questions"
+      hx-trigger="every 2s, questionAdded from:body"
+      hx-swap="outerHTML swap:*"
+      class="questions">
+   <!-- questions inserted here -->
+ </div>
+</main>
+#+end_src
+
+*** _questions_list.html (partial)
+#+begin_src html
+<div id="questions"
+    hx-get="/r/{id}/questions"
+    hx-trigger="every 2s, questionAdded from:body"
+    hx-swap="outerHTML swap:*"
+    class="questions">
+
+ <!-- repeated for each question -->
+ <div class="question" id="q-{qid}">
+   <p>{text}</p>
+   <small>{author}</small>
+   <button hx-post="/r/{id}/questions/{qid}/up"
+           hx-swap="none"
+           class="upvote">
+     ▲ {votes}
+   </button>
+   <!-- only shown if admin -->
+   <button hx-delete="/r/{id}/questions/{qid}"
+           hx-swap="none"
+           hx-confirm="Delete this question?"
+           class="delete">
+     ×
+   </button>
+ </div>
+</div>
+#+end_src
+
+** CSS Animations
+#+begin_src css
+.question {
+ transition: all 0.2s ease-out;
+}
+
+.htmx-swapping .question {
+ opacity: 0;
+ transform: translateX(-10px);
+}
+#+end_src
+
+** Security Considerations
+- All SQL uses prepared statements
+- HTML escape all output
+- Input validation:
+ - room_id: integer
+ - session_id: UUID format
+ - text: non-empty, length limit 1024
+ - author: optional, length limit 50
+- Admin tokens never exposed in normal operation
+- Cookies marked HttpOnly
