@@ -1,1 +1,4 @@
-(package: qons)
+(package:
+ qons
+ depend:
+ ("github.com/luciusmagn/shsx" "github.com/luciusmagn/smart-httpd"))

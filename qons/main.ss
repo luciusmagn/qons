@@ -2,6 +2,8 @@
 (import :std/error
         :std/sugar
         :std/cli/getopt
+        :lho/shsx/lib
+        :lho/smart-httpd/lib
         ./lib)
 (export main)
 
@@ -11,11 +13,11 @@
 
 (def (main . args)
   (call-with-getopt qons-main args
-    program: "qons"
-    help: "A one line description of your program"
-    ;; commands/options/flags for your program; see :std/cli/getopt
-    ;; ...
-    ))
+                    program: "qons"
+                    help: "A one line description of your program"))
+;; commands/options/flags for your program; see :std/cli/getopt
+;; ...
+
 
 (def* qons-main
   ((opt)
