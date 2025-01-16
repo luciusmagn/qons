@@ -6,38 +6,50 @@
 (export #t)
 
 ;; Base template with common structure
-(def (base-template title content)
+(define (base-template title content)
   (shsx
    (html:
     (head:
      (title: ,title)
      (meta: charset: "utf-8")
      (script: src: "https://unpkg.com/htmx.org@1.9.10")
+     (link: rel: "stylesheet" href: "https://cdn.jsdelivr.net/gh/luciusmagn/berkeley-css/dist/berkeley.css")
      (link: rel: "stylesheet" href: "/static/style.css"))
     (body: ,content))))
 
 ;; Index page
-(def (index-page)
+(define (index-page)
   (base-template
-   "QONS - Question Room"
+   "QONS"
    (shsx
     (main:
-     (h1: "Question Room")
-     (form: hx-post: "/r" hx-swap: "none"
-            (button: "Create New Room"))
-     (form: hx-get: "/r/${roomId}"
-            hx-trigger: "submit"
-            hx-target: "body"
-            hx-push-url: "true"
-            (input: type: "text"
-                    name: "roomId"
-                    placeholder: "Enter room code"
-                    pattern: "[0-9]+"
-                    required: "")
-            (button: "Join Room"))))))
+     (section: class: "container"
+               (h1: class: "qons-title"
+                    "Q0NS")
+               (form:
+                class: "qons-code-form"
+                (div: class: "qons-input-container"
+                      (input: type: "text"
+                              name: "roomId"
+                              class: "room-code-input"
+                              placeholder: "room code"
+                              pattern: "[0-9]+"
+                              required: ""))
+                (div: class: "qons-buttons"
+                      (button: hx-get: "/r/${roomId}"
+                               hx-trigger: "click"
+                               hx-target: "body"
+                               hx-push-url: "true"
+                               class: "primary"
+                               "Join")
+                      (button: hx-post: "/r"
+                               hx-swap: "none"
+                               type: "button"
+                               class: "secondary"
+                               "Create Room"))))))))
 
 ;; Room page
-(def (room-page room)
+(define (room-page room)
   (base-template
    (format "Room #~a" (room-id room))
    (shsx
@@ -54,7 +66,7 @@
      ,(questions-list room '())))))
 
 ;; Questions list partial (for HTMX updates)
-(def (questions-list room questions-with-votes)
+(define (questions-list room questions-with-votes)
   (shsx
    (div: id: "questions"
          hx-get: ,(format "/r/~a/questions" (room-id room))
@@ -63,13 +75,13 @@
          class: "questions"
          ,@(map (lambda (qvi)
                   (question-item (room-id room)
-                                 (car qvi)    ; question
-                                 (cadr qvi)   ; votes
+                                 (car qvi)     ; question
+                                 (cadr qvi)    ; votes
                                  (caddr qvi))) ; is-admin?
                 questions-with-votes))))
 
 ;; Single question item
-(def (question-item room-id q votes is-admin?)
+(define (question-item room-id q votes is-admin?)
   (shsx
    (div: class: "question"
          id: ,(format "q-~a" (question-id q))

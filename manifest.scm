@@ -38,25 +38,22 @@
    "develop"
    `'(let ((project-dir ,(string-append "./" project-name))
            (binary-path ,(string-append ".gerbil/bin/" project-name))
-           (server-pid #f))
+           (pid-file "/tmp/dev-server.pid"))
 
        (use-modules (ice-9 popen)
                     (ice-9 rdelim))
 
        (letrec ((kill-server
                  (lambda ()
-                   (when server-pid
-                     (system* "kill" (number->string server-pid)))))
+                   (when (file-exists? pid-file)
+                     (system* "kill" (call-with-input-file pid-file read-line))
+                     (delete-file pid-file))))
 
                 (start-server
                  (lambda ()
                    (kill-server)
-                   (let ((pid (primitive-fork)))
-                     (if (zero? pid)
-                         (begin
-                           (system* binary-path)
-                           (exit 0))
-                         (set! server-pid pid)))))
+                   (system* "sh" "-c"
+                            (string-append binary-path " & echo $! > " pid-file))))
 
                 (rebuild-and-restart
                  (lambda ()
