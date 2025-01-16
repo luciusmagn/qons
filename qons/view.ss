@@ -52,16 +52,16 @@
    (format "Room #~a" (room-id room))
    (shsx
     (main:
-     (h1: "Room #" (span: id: "room-id" ,(room-id room)))
-     (form: hx-post: ,(format "/r/~a/questions" (room-id room))
+     (h1: "Room #" (span: id: "room-id" ,(number->string (room-id room))))
+     (form: hx-post: ,(format "/r/~a/questions" (number->string (room-id room)))
             hx-swap: "none"
             hx-target: "#questions"
             (textarea: name: "text" required: "")
             (input: type: "text"
                     name: "author"
                     placeholder: "Name (optional)")
-            (button: "Ask"))
-     ,(questions-list room '())))))
+            (button: "Ask"))))))
+;;,(questions-list room '())))))
 
 ;; Questions list partial (for HTMX updates)
 (define (questions-list room questions-with-votes)

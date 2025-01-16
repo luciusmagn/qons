@@ -28,7 +28,7 @@
 (def view-room-handler
   (handler ((id :>number)) <- (_ :>)
            ;; TODO: fetch room from DB
-           (let ((room (room 123 "abc" #f)))
+           (let ((room (room 123 "abc" "2025-01-12")))
              (cons 200 (render-html (room-page room))))))
 
 ;; Admin access to room
