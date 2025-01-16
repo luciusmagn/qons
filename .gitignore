@@ -3,3 +3,4 @@ build-deps
 /manifest.ss
 .gerbil
 /TAGS
+/qons.db

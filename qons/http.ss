@@ -5,16 +5,23 @@
         :std/text/json
         :lho/shsx/lib
         :lho/smart-httpd/lib
+        (only-in :std/srfi/1 find)
         ./lib
         ./view)
-(export run-api)
+(export #t)
 
 ;; Index handler - sets session cookie if not present
 (def index-handler
-  (handler () <- (_ :>)
-           (list 200
-                 (list (cons "Set-Cookie" "session_id=..."))
-                 (render-html (index-page)))))
+  (handler ((cookies :>cookies)) <- (body :>)
+           (displayln (find (lambda (c)
+                              (equal? "session_id" (request-cookie-name c)))
+                            cookies))
+           (let ((session-id (or (find-cookie-val cookies "session_id")
+                                 (uuid->string (random-uuid)))))
+             (respond-with
+              (:status 200)
+              (:cookie "session_id" session-id)
+              (:body (render-html (index-page)))))))
 
 ;; Create room
 (def create-room-handler
