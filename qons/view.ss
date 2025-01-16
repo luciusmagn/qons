@@ -36,11 +36,9 @@
                               pattern: "[0-9]+"
                               required: ""))
                 (div: class: "qons-buttons"
-                      (button: hx-get: "/r/${roomId}"
-                               hx-trigger: "click"
-                               hx-target: "body"
-                               hx-push-url: "true"
-                               class: "primary"
+                      (button: class: "primary"
+                               onclick: "window.location.href='/r/' + document.querySelector('[name=roomId]').value"
+                               type: "button"
                                "Join")
                       (button: hx-post: "/r"
                                hx-swap: "none"
