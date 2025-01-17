@@ -100,7 +100,7 @@
                                      (hash)))
                       ;; Add this room to admin hash
                       (new-admin-rooms
-                       (begin (hash-put! (hash-copy admin-rooms)
+                       (begin (hash-put! admin-rooms
                                          (number->string id)
                                          token)
                               admin-rooms)))
