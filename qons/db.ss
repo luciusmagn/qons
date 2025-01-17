@@ -30,9 +30,11 @@
   (create-tables!))
 
 ;; Helper function for DB operations
-(def (with-db fn)
+(define (with-db fn)
   (displayln "connection requested")
-  (displayln (conpool-get db-pool 20))
+  (try
+   (displayln (conpool-get db-pool 20))
+   (catch (e) (displayln e)))
   (displayln "fuck")
   (let ((conn (conpool-get db-pool 20)))
     (displayln "connection acquired")
@@ -77,6 +79,7 @@
   (displayln "ehllowo")
   (with-db
    (lambda (conn)
+     (displayln "we got a db connection")
      (sql-eval conn
                "INSERT INTO room (id, admin_token, created_at) VALUES (?, ?, datetime('now'))"
                id admin-token)

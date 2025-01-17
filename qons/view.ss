@@ -61,7 +61,7 @@
                     name: "author"
                     placeholder: "Name (optional)")
             (button: "Ask"))))))
-;;,(questions-list room '())))))
+;;   ,(questions-list room '())))))
 
 ;; Questions list partial (for HTMX updates)
 (define (questions-list room questions-with-votes)

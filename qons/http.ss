@@ -15,9 +15,6 @@
 ;; Index handler - sets session cookie if not present
 (def index-handler
   (handler ((cookies :>cookies)) <- (body :>)
-           (displayln (find (lambda (c)
-                              (equal? "session_id" (request-cookie-name c)))
-                            cookies))
            (let ((session-id (or (find-cookie-val cookies "session_id")
                                  (uuid->string (random-uuid)))))
              (respond-with

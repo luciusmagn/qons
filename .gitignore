@@ -4,3 +4,4 @@ build-deps
 .gerbil
 /TAGS
 /qons.db
+/*.db
