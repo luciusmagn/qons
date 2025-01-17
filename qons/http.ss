@@ -53,12 +53,14 @@
 ;; View room (user view)
 (define view-room-handler
   (handler ((id :>number)) <- (_ :>)
-           ;; TODO: fetch room from DB
-           (let ((room (room 123 "abc" "2025-01-12")))
-             (respond-with
-              (:status 200)
-              (:header "HX-Refresh" "true")
-              (:body (render-html (room-page room)))))))
+           (let ((room (get-room id)))
+             (if room
+               (respond-with
+                (:status 200)
+                (:body (render-html (room-page room))))
+               (respond-with
+                (:status 404)
+                (:body "No such room foo"))))))
 
 ;; Admin access to room
 (define admin-room-handler
