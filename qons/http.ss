@@ -19,6 +19,7 @@
                                  (uuid->string (random-uuid)))))
              (respond-with
               (:status 200)
+              (:header "HX-Refresh" "true")
               (:cookie "session_id" session-id)
               (:body (render-html (index-page)))))))
 
@@ -54,16 +55,42 @@
   (handler ((id :>number)) <- (_ :>)
            ;; TODO: fetch room from DB
            (let ((room (room 123 "abc" "2025-01-12")))
-             (cons 200 (render-html (room-page room))))))
+             (respond-with
+              (:status 200)
+              (:header "HX-Refresh" "true")
+              (:body (render-html (room-page room)))))))
 
 ;; Admin access to room
 (define admin-room-handler
-  (handler ((id :>number) (token :>string)) <- (_ :>)
-           ;; TODO: verify token and set admin cookie
-           (list 302
-                 (list (cons "Location" "/r/123")
-                       (cons "Set-Cookie" "admin_rooms={...}"))
-                 "")))
+  (handler ((id :>number) (token :>string) (cookies :>cookies)) <- (_ :>)
+           (let ((room (get-room id)))
+             (cond
+              ((not room)
+               (cons 404 "Room not found"))
+
+              ((not (equal? token (room-admin-token room)))
+               (cons 403 "Invalid admin token"))
+
+              (else
+               ;; Get existing admin rooms from cookie
+               (let* ((admin-cookie (find-cookie-val cookies "admin_rooms"))
+                      (admin-rooms (if admin-cookie
+                                     (try (string->json-object admin-cookie)
+                                          (catch (e) (hash)))
+                                     (hash)))
+                      ;; Add this room to admin hash
+                      (new-admin-rooms
+                       (hash-put! (hash-copy admin-rooms)
+                                  (number->string id)
+                                  token)))
+
+                 (respond-with
+                  (:status 200)
+                  (:header "HX-Redirect" (format "/r/~a" id))
+                  (:cookie "admin_rooms"
+                   (call-with-output-string
+                     (cut write-json new-admin-rooms <>)))
+                  (:body ""))))))))
 
 ;; Get questions (polling)
 (define get-questions-handler

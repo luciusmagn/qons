@@ -16,7 +16,7 @@
   (let ((port (hash-ref opt 'port "8080"))
         (host (hash-ref opt 'host "127.0.0.1"))
         (db-path (hash-ref opt 'db "qons.db")))
-    (displayln "Initializing database at " db-path)
+    (displayln "Initializing DB at " db-path)
     (init-db! db-path)
     (displayln "Starting QONS on " host ":" port)
     (run-api port host)))
