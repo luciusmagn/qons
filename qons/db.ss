@@ -19,9 +19,9 @@
         get-question-votes)
 
 ;; Connection pool management
-(def db-pool #f)
+(define db-pool #f)
 
-(def (init-db! db-path)
+(define (init-db! db-path)
   (unless db-pool
     (set! db-pool
       (make-conpool
@@ -31,11 +31,8 @@
 
 ;; Helper function for DB operations
 (define (with-db fn)
-  (displayln "connection requested")
-  (try
-   (displayln (conpool-get db-pool 20))
-   (catch (e) (displayln e)))
-  (displayln "fuck")
+  (unless db-pool
+    (printf "You forgot to initialize the DB pool. Use (init-db! db-path)\n"))
   (let ((conn (conpool-get db-pool 20)))
     (displayln "connection acquired")
     (try (fn conn)
@@ -45,7 +42,7 @@
          (finally (conpool-put db-pool conn)))))
 
 ;; Initialize tables
-(def (create-tables!)
+(define (create-tables!)
   (with-db
    (lambda (conn)
      (sql-eval conn "CREATE TABLE IF NOT EXISTS room (
@@ -75,29 +72,29 @@
                     )"))))
 
 ;; Room operations
-(def (create-room! id admin-token)
-  (displayln "ehllowo")
+(define (create-room! id admin-token)
   (with-db
    (lambda (conn)
-     (displayln "we got a db connection")
      (sql-eval conn
                "INSERT INTO room (id, admin_token, created_at) VALUES (?, ?, datetime('now'))"
                id admin-token)
      (get-room id))))
 
-(def (get-room id)
+(define (get-room id)
   (with-db
    (lambda (conn)
-     (def stmt (sql-prepare conn "SELECT * FROM room WHERE id = ?"))
+     (define stmt (sql-prepare conn "SELECT * FROM room WHERE id = ?"))
      (sql-bind stmt id)
-     (def result (sql-query stmt))
+
+     (define result (sql-query stmt))
+
      (if (null? result) #f
          (let ((r (car result)))
            (room (vector-ref r 0)
                  (vector-ref r 1)
                  (vector-ref r 2)))))))
 
-(def (delete-room! id admin-token)
+(define (delete-room! id admin-token)
   (with-db
    (lambda (conn)
      (sql-eval conn
@@ -105,7 +102,7 @@
                id admin-token))))
 
 ;; Question operations
-(def (create-question! room-id text author)
+(define (create-question! room-id text author)
   (with-db
    (lambda (conn)
      (sql-eval conn
@@ -113,10 +110,10 @@
                VALUES (?, ?, ?, datetime('now'))"
                room-id text author))))
 
-(def (get-room-questions room-id session-id)
+(define (get-room-questions room-id session-id)
   (with-db
    (lambda (conn)
-     (def stmt
+     (define stmt
        (sql-prepare conn
                     "SELECT q.*, COUNT(v.question_id) as votes,
                     EXISTS(
@@ -132,7 +129,7 @@
      (sql-bind stmt session-id room-id)
      (sql-query stmt))))
 
-(def (delete-question! id room-id)
+(define (delete-question! id room-id)
   (with-db
    (lambda (conn)
      (sql-eval conn
@@ -140,7 +137,7 @@
                id room-id))))
 
 ;; Vote operations
-(def (create-vote! session-id question-id)
+(define (create-vote! session-id question-id)
   (with-db
    (lambda (conn)
      (try
@@ -150,10 +147,10 @@
                 session-id question-id)
       (catch (e) #f)))))  ; silently fail on duplicate votes
 
-(def (get-question-votes question-id)
+(define (get-question-votes question-id)
   (with-db
    (lambda (conn)
-     (def result
+     (define result
        (sql-eval-query conn
                        "SELECT COUNT(*) FROM vote WHERE question_id = ?"
                        question-id))

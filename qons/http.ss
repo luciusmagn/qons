@@ -13,7 +13,7 @@
 (export #t)
 
 ;; Index handler - sets session cookie if not present
-(def index-handler
+(define index-handler
   (handler ((cookies :>cookies)) <- (body :>)
            (let ((session-id (or (find-cookie-val cookies "session_id")
                                  (uuid->string (random-uuid)))))
@@ -50,14 +50,14 @@
               (:body "")))))
 
 ;; View room (user view)
-(def view-room-handler
+(define view-room-handler
   (handler ((id :>number)) <- (_ :>)
            ;; TODO: fetch room from DB
            (let ((room (room 123 "abc" "2025-01-12")))
              (cons 200 (render-html (room-page room))))))
 
 ;; Admin access to room
-(def admin-room-handler
+(define admin-room-handler
   (handler ((id :>number) (token :>string)) <- (_ :>)
            ;; TODO: verify token and set admin cookie
            (list 302
@@ -66,34 +66,34 @@
                  "")))
 
 ;; Get questions (polling)
-(def get-questions-handler
+(define get-questions-handler
   (handler ((id :>number)) <- (_ :>)
            ;; TODO: fetch questions from DB
            (let ((room (room id "abc" #f)))
              (cons 200 (render-html (questions-list room '()))))))
 
 ;; Rest of handlers unchanged since they return plain strings
-(def submit-question-handler
+(define submit-question-handler
   (handler ((id :>number)) <- (body :>form)
            ;; TODO: save question to DB
            (cons 200 "")))
 
-(def delete-question-handler
+(define delete-question-handler
   (handler ((id :>number) (qid :>number)) <- (_ :>)
            ;; TODO: verify admin and delete
            (cons 200 "")))
 
-(def upvote-handler
+(define upvote-handler
   (handler ((id :>number) (qid :>number)) <- (_ :>)
            ;; TODO: record vote in DB
            (cons 200 "")))
 
-(def delete-room-handler
+(define delete-room-handler
   (handler ((id :>number)) <- (_ :>)
            ;; TODO: verify admin and delete
            (cons 200 "")))
 
-(def routes
+(define routes
   (list
    (get    "/"                        index-handler)
    (post   "/r"                       create-room-handler)
@@ -105,5 +105,7 @@
    (post   "/r/:id/questions/:qid/up" upvote-handler)
    (delete "/r/:id"                   delete-room-handler)))
 
-(def (run-api port host)
-  (run-server routes port: port address: host))
+(define (run-api port host)
+  (run-server routes
+              port: port
+              address: host))
