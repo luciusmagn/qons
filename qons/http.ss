@@ -7,7 +7,9 @@
         :lho/smart-httpd/lib
         (only-in :std/srfi/1 find)
         ./lib
-        ./view)
+        ./view
+        ./utils
+        ./db)
 (export #t)
 
 ;; Index handler - sets session cookie if not present
@@ -24,12 +26,31 @@
               (:body (render-html (index-page)))))))
 
 ;; Create room
-(def create-room-handler
+(define create-room-handler
   (handler () <- (_ :>)
-           ;; TODO: generate room id and admin token
-           (list 302
-                 (list (cons "Location" "/r/123/abc"))
-                 "")))
+           (define (random-room-id)
+             ;; generate id between 100000 and 999999
+             (+ 100000 (random-integer 1000000)))
+
+           (define (random-token)
+             (define chars "0123456789abcdef")
+             (define len   (string-length chars))
+
+             (let loop ((n 12) (acc ""))
+               (if (zero? n)
+                 acc
+                 (loop (- n 1)
+                       (string-append
+                        acc
+                        (string (string-ref chars (random-integer len))))))))
+
+           (let* ((id    (random-room-id))
+                  (token (random-token))
+                  (room  (create-room! id token)))
+             (respond-with
+              (:status 302)
+              (:header "Location" (format "/r/~a/~a" id token))
+              (:body "")))))
 
 ;; View room (user view)
 (def view-room-handler

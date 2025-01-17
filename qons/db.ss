@@ -31,7 +31,11 @@
 
 ;; Helper function for DB operations
 (def (with-db fn)
+  (displayln "connection requested")
+  (displayln (conpool-get db-pool 20))
+  (displayln "fuck")
   (let ((conn (conpool-get db-pool 20)))
+    (displayln "connection acquired")
     (try (fn conn)
          (catch (e)
            (conpool-release db-pool conn)
@@ -70,12 +74,13 @@
 
 ;; Room operations
 (def (create-room! id admin-token)
+  (displayln "ehllowo")
   (with-db
    (lambda (conn)
      (sql-eval conn
                "INSERT INTO room (id, admin_token, created_at) VALUES (?, ?, datetime('now'))"
                id admin-token)
-     (room id admin-token (date->string (current-date))))))
+     (get-room id))))
 
 (def (get-room id)
   (with-db
