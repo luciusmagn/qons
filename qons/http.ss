@@ -109,6 +109,7 @@
                  (respond-with
                   (:status 200)
                   (:header "HX-Redirect" (format "/r/~a" id))
+                  ;; TODO: set Path=/
                   (:cookie "admin_rooms"
                    (call-with-output-string
                      (cut write-json new-admin-rooms <>)))
