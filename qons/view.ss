@@ -47,12 +47,13 @@
                                "Create Room"))))))))
 
 ;; Room page
-(define (room-page room)
+(define (room-page room admin-status)
   (base-template
    (format "Room #~a" (room-id room))
    (shsx
     (main:
      (h1: "Room #" (span: id: "room-id" ,(number->string (room-id room))))
+     (p: "You are the admin of this room")
      (form: hx-post: ,(format "/r/~a/questions" (number->string (room-id room)))
             hx-swap: "none"
             hx-target: "#questions"

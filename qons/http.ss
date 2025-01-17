@@ -12,6 +12,23 @@
         ./db)
 (export #t)
 
+;; TODO: move elswhere, perhaps?
+(define (is-admin? room-id cookies)
+  (displayln "in is-admin?")
+  (let* ((admin-cookie (find-cookie-val cookies "admin_rooms"))
+         (ieaie        (displayln "found admin_rooms"))
+         (admin-rooms  (if admin-cookie
+                         (try (string->json-object admin-cookie)
+                              (catch (e) (hash)))
+                         (hash)))
+         (ieaoooo      (displayln admin-rooms))
+         (room-token   (hash-ref admin-rooms (number->string room-id) #f)))
+    (displayln "got a smelly token")
+    (and room-token
+         (let ((room (get-room room-id)))
+           (and room
+                (equal? room-token (room-admin-token room)))))))
+
 ;; Index handler - sets session cookie if not present
 (define index-handler
   (handler ((cookies :>cookies)) <- (body :>)
@@ -52,12 +69,13 @@
 
 ;; View room (user view)
 (define view-room-handler
-  (handler ((id :>number)) <- (_ :>)
+  (handler ((id :>number) (cookies :>cookies)) <- (_ :>)
            (let ((room (get-room id)))
              (if room
-               (respond-with
-                (:status 200)
-                (:body (render-html (room-page room))))
+               (let ((admin-status (is-admin? id cookies)))
+                 (respond-with
+                  (:status 200)
+                  (:body (render-html (room-page room admin-status)))))
                (respond-with
                 (:status 404)
                 (:body "No such room foo"))))))
@@ -82,10 +100,12 @@
                                      (hash)))
                       ;; Add this room to admin hash
                       (new-admin-rooms
-                       (hash-put! (hash-copy admin-rooms)
-                                  (number->string id)
-                                  token)))
-
+                       (begin (hash-put! (hash-copy admin-rooms)
+                                         (number->string id)
+                                         token)
+                              admin-rooms)))
+                 (displayln "FUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUCK")
+                 (displayln new-admin-rooms)
                  (respond-with
                   (:status 200)
                   (:header "HX-Redirect" (format "/r/~a" id))
