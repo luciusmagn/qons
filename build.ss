@@ -2,9 +2,6 @@
 ;;; -*- Gerbil -*-
 (import :std/build-script)
 
-;;(defbuild-script
-;;  '("qons/lib"
-;;    (exe: "qons/main" bin: "qons")))
 (defbuild-script
   '("qons/lib" "qons/view" "qons/db" "qons/http" "qons/utils"
     (exe: "qons/main" bin: "qons")))
