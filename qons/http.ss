@@ -14,22 +14,18 @@
 
 ;; TODO: move elswhere, perhaps?
 (define (is-admin? room-id cookies)
-  (displayln "in is-admin?")
   (let* ((admin-cookie (find-cookie-val cookies "admin_rooms"))
-         (ieaie        (displayln "found admin_rooms"))
          (admin-rooms  (if admin-cookie
                          (try (string->json-object admin-cookie)
                               (catch (e) (hash)))
                          (hash)))
-         (ieaoooo      (displayln admin-rooms))
          (room-token   (hash-ref admin-rooms (number->string room-id) #f)))
-    (displayln "got a smelly token")
     (and room-token
          (let ((room (get-room room-id)))
            (and room
                 (equal? room-token (room-admin-token room)))))))
 
-;; Index handler - sets session cookie if not present
+;; index handler just sets session cookie if not present
 (define index-handler
   (handler ((cookies :>cookies)) <- (body :>)
            (let ((session-id (or (find-cookie-val cookies "session_id")
