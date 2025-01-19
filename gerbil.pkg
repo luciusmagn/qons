@@ -1,4 +1,6 @@
 (package:
  qons
  depend:
- ("github.com/luciusmagn/shsx" "github.com/luciusmagn/smart-httpd"))
+ ("github.com/luciusmagn/shsx"
+  "github.com/luciusmagn/smart-httpd"
+  "github.com/luciusmagn/fxns"))
