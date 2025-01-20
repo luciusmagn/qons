@@ -66,12 +66,25 @@
 ;; View room (user view)
 (define view-room-handler
   (handler ((id :>number) (cookies :>cookies)) <- (_ :>)
-           (let ((room (get-room id)))
+           (let* ((session-id       (or (find-cookie-val cookies "session_id")
+                                        (uuid->string (random-uuid))))
+                  (room             (get-room id))
+                  (questions        (get-room-questions id session-id))
+                  ;; TODO: what will happen if room don't exist?
+                  (mapped-questions (map (lambda (q)
+                                           (list (question (vector-ref q 0)  ; id
+                                                           (vector-ref q 1)  ; room_id
+                                                           (vector-ref q 2)  ; text
+                                                           (vector-ref q 3)  ; author
+                                                           (vector-ref q 4)) ; created_at
+                                                 (vector-ref q 5)  ; votes
+                                                 (is-admin? id cookies)))
+                                         questions)))
              (if room
                (let ((admin-status (is-admin? id cookies)))
                  (respond-with
                   (:status 200)
-                  (:body (render-html (room-page room admin-status)))))
+                  (:body (render-html (room-page room mapped-questions admin-status)))))
                (respond-with
                 (:status 404)
                 (:body "No such room foo"))))))

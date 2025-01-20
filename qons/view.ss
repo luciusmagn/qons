@@ -55,7 +55,7 @@
                                "Create Room"))))))))
 
 ;; Room page
-(define (room-page room admin-status?)
+(define (room-page room questions admin-status?)
   (base-template
    (format "Room #~a" (room-id room))
    (shsx
@@ -76,7 +76,7 @@
                           name: "author"
                           placeholder: "Name (optional)")
                   (button: "Ask"))
-           ,(questions-list room '())))))
+           ,(questions-list room questions)))))
 
 ;; Questions list partial (for HTMX updates)
 (define (questions-list room questions-with-votes)
