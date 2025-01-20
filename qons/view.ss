@@ -83,7 +83,7 @@
   (shsx
    (div: id: "questions"
          hx-get: ,(format "/r/~a/questions" (room-id room))
-         ;;hx-trigger: "every 2s, questionAdded from:body"
+         hx-trigger: "every 2s, questionAdded from:body"
          hx-swap: "outerHTML swap:*"
          class: "questions"
          ,@(map (lambda (qvi)

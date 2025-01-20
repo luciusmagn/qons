@@ -113,16 +113,54 @@
 
 ;; Get questions (polling)
 (define get-questions-handler
-  (handler ((id :>number)) <- (_ :>)
-           ;; TODO: fetch questions from DB
-           (let ((room (room id "abc" #f)))
-             (cons 200 (render-html (questions-list room '()))))))
+  (handler ((id :>number) (cookies :>cookies)) <- (_ :>)
+           (let ((flungus (let* ((session-id (find-cookie-val cookies "session_id"))
+                                 (room (get-room id)))
+                            (if room
+                              (let ((questions (get-room-questions id session-id)))
+                                (displayln "eeeeeeeee")
+                                (displayln questions)
+                                (respond-with
+                                 (:status 200)
+                                 (:body   (render-html
+                                           (questions-list room
+                                                           (map (lambda (q)
+                                                                  (list (question (vector-ref q 0)  ; id
+                                                                                  (vector-ref q 1)  ; room_id
+                                                                                  (vector-ref q 2)  ; text
+                                                                                  (vector-ref q 3)  ; author
+                                                                                  (vector-ref q 4)) ; created_at
+                                                                        (vector-ref q 5)  ; votes
+                                                                        (is-admin? id cookies)))
+                                                                questions))))))
+                              (respond-with
+                               (:status 404)
+                               (:body   "Room not found"))))))
+             (displayln flungus)
+             (displayln (response-body flungus))
+             flungus)))
 
 ;; Rest of handlers unchanged since they return plain strings
 (define submit-question-handler
-  (handler ((id :>number)) <- (body :>form)
-           ;; TODO: save question to DB
-           (cons 200 "")))
+  (handler ((id :>number) (cookies :>cookies)) <- (body :>form)
+           (displayln (hash->list body))
+           (displayln "ARRRRRRRRRRRRRRRRRRRRRRRRRRRRRR")
+           (let* ((text (hash-ref body 'text #f))
+                  (author (hash-ref body 'author #f))
+                  (room (get-room id)))
+             (displayln room)
+             (displayln author)
+             (displayln text)
+             (if (and room text)
+               (begin
+                 (displayln "-----------------------reating tha qusiton")
+                 (create-question! id text author)
+                 (respond-with
+                  (:status 200)
+                  (:body   "")))
+               (respond-with
+                (:status 400)
+                (:body   "Invalid request"))))))
 
 (define delete-question-handler
   (handler ((id :>number) (qid :>number)) <- (_ :>)
@@ -144,11 +182,12 @@
    (get    "/"                        index-handler)
    (post   "/r"                       create-room-handler)
    (get    "/r/:id"                   view-room-handler)
-   (get    "/r/:id/:token"            admin-room-handler)
    (get    "/r/:id/questions"         get-questions-handler)
    (post   "/r/:id/questions"         submit-question-handler)
    (delete "/r/:id/questions/:qid"    delete-question-handler)
    (post   "/r/:id/questions/:qid/up" upvote-handler)
+   (get    "/r/:id/:token"            admin-room-handler)
+   ;; TODO: :token vs questions order shouldn't matter, impl in smart-httpd
    (delete "/r/:id"                   delete-room-handler)))
 
 (define (run-api port host)
