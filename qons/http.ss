@@ -12,14 +12,14 @@
         ./db)
 (export #t)
 
-;; TODO: move elswhere, perhaps?
+;; TODO: move elsewhere, perhaps?
 (define (is-admin? room-id cookies)
   (let* ((admin-cookie (find-cookie-val cookies "admin_rooms"))
          (admin-rooms  (if admin-cookie
                          (try (string->json-object admin-cookie)
                               (catch (e) (hash)))
                          (hash)))
-         (room-token   (hash-ref admin-rooms (number->string room-id) #f)))
+         (room-token   (hash-ref admin-rooms (string->symbol (number->string room-id)) #f)))
     (and room-token
          (let ((room (get-room room-id)))
            (and room
@@ -78,7 +78,7 @@
 
 ;; Admin access to room
 (define admin-room-handler
-  (handler ((id :>number) (token :>string) (cookies :>cookies)) <- (_ :>)
+  (handler ((id :>number) (token :>string) (cookies :>cookies) (headers :>headers)) <- (_ :>)
            (let ((room (get-room id)))
              (cond
               ((not room)
@@ -100,15 +100,15 @@
                                          (number->string id)
                                          token)
                               admin-rooms)))
-                 (displayln "FUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUCK")
-                 (displayln new-admin-rooms)
                  (respond-with
-                  (:status 200)
-                  (:header "HX-Redirect" (format "/r/~a" id))
-                  ;; TODO: set Path=/
+                  (if (find (lambda (h) (equal? (car h) "Hx-Request")) headers)
+                    (list (:status 200)
+                          (:header "HX-Redirect" (format "/r/~a" id)))
+                    (list (:status 302)
+                          (:header "Location" (format "/r/~a" id))))
                   (:cookie "admin_rooms"
                    (call-with-output-string
-                     (cut write-json new-admin-rooms <>)))
+                    (cut write-json new-admin-rooms <>)))
                   (:body ""))))))))
 
 ;; Get questions (polling)

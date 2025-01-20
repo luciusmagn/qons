@@ -15,7 +15,15 @@
      (script: src: "https://unpkg.com/htmx.org@1.9.10")
      (link: rel: "stylesheet" href: "https://cdn.jsdelivr.net/gh/luciusmagn/berkeley-css/dist/berkeley.css")
      (link: rel: "stylesheet" href: "/static/style.css"))
-    (body: ,content))))
+    (body:
+     ,content
+     (script: "// This part of code is copied from https://stackoverflow.com/a/73593579
+               document.body.addEventListener('htmx:beforeOnLoad', function(evt) {
+                   if (evt.detail.xhr.status >= 300 && evt.detail.xhr.status < 500) {
+                       evt.detail.shouldSwap = true;
+                       evt.detail.idError = false;
+                   }
+               });")))))
 
 ;; Index page
 (define (index-page)
@@ -47,29 +55,35 @@
                                "Create Room"))))))))
 
 ;; Room page
-(define (room-page room admin-status)
+(define (room-page room admin-status?)
   (base-template
    (format "Room #~a" (room-id room))
    (shsx
-    (main:
-     (h1: "Room #" (span: id: "room-id" ,(number->string (room-id room))))
-     (p: "You are the admin of this room")
-     (form: hx-post: ,(format "/r/~a/questions" (number->string (room-id room)))
-            hx-swap: "none"
-            hx-target: "#questions"
-            (textarea: name: "text" required: "")
-            (input: type: "text"
-                    name: "author"
-                    placeholder: "Name (optional)")
-            (button: "Ask"))))))
-;;   ,(questions-list room '())))))
+    (main: class: "container"
+           (h1: "Room #" (span: id: "room-id" ,(number->string (room-id room))))
+           ,(@when admin-status?
+              (p: "You are the admin of this room. Copy its admin link "
+                  (a: href: ,(format "/r/~a/~a"
+                                     (number->string (room-id room))
+                                     (room-admin-token room))
+                      "here")
+                  "."))
+           (form: hx-post: ,(format "/r/~a/questions" (number->string (room-id room)))
+                  hx-swap: "none"
+                  hx-target: "#questions"
+                  (textarea: name: "text" required: "")
+                  (input: type: "text"
+                          name: "author"
+                          placeholder: "Name (optional)")
+                  (button: "Ask"))
+           ,(questions-list room '())))))
 
 ;; Questions list partial (for HTMX updates)
 (define (questions-list room questions-with-votes)
   (shsx
    (div: id: "questions"
          hx-get: ,(format "/r/~a/questions" (room-id room))
-         hx-trigger: "every 2s, questionAdded from:body"
+         ;;hx-trigger: "every 2s, questionAdded from:body"
          hx-swap: "outerHTML swap:*"
          class: "questions"
          ,@(map (lambda (qvi)

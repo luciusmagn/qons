@@ -2,9 +2,10 @@
 (import :std/sugar
         :std/format
         :std/crypto
-        :std/misc/bytes)
+        :std/misc/bytes
+        :lho/fxns/lib)
 (export #t)
 
-(define (random-integer cap)
-  (modulo (u8vector->uint (random-bytes 12))
-          cap))
+(fn :ret random-integer ((cap : integer?) -> integer?)
+    (modulo (u8vector->uint (random-bytes 12))
+            cap))
