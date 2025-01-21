@@ -114,31 +114,26 @@
 ;; Get questions (polling)
 (define get-questions-handler
   (handler ((id :>number) (cookies :>cookies)) <- (_ :>)
-           (let ((flungus (let* ((session-id (find-cookie-val cookies "session_id"))
-                                 (room (get-room id)))
-                            (if room
-                              (let ((questions (get-room-questions id session-id)))
-                                (displayln "eeeeeeeee")
-                                (displayln questions)
-                                (respond-with
-                                 (:status 200)
-                                 (:body   (render-html
-                                           (questions-list room
-                                                           (map (lambda (q)
-                                                                  (list (question (vector-ref q 0)  ; id
-                                                                                  (vector-ref q 1)  ; room_id
-                                                                                  (vector-ref q 2)  ; text
-                                                                                  (vector-ref q 3)  ; author
-                                                                                  (vector-ref q 4)) ; created_at
-                                                                        (vector-ref q 5)  ; votes
-                                                                        (is-admin? id cookies)))
-                                                                questions))))))
-                              (respond-with
-                               (:status 404)
-                               (:body   "Room not found"))))))
-             (displayln flungus)
-             (displayln (response-body flungus))
-             flungus)))
+           (let* ((session-id (find-cookie-val cookies "session_id"))
+                  (room (get-room id)))
+             (if room
+               (let ((questions (get-room-questions id session-id)))
+                 (respond-with
+                  (:status 200)
+                  (:body   (render-html
+                            (questions-list room
+                                            (map (lambda (q)
+                                                   (list (question (vector-ref q 0)  ; id
+                                                                   (vector-ref q 1)  ; room_id
+                                                                   (vector-ref q 2)  ; text
+                                                                   (vector-ref q 3)  ; author
+                                                                   (vector-ref q 4)) ; created_at
+                                                         (vector-ref q 5)  ; votes
+                                                         (is-admin? id cookies)))
+                                                 questions))))))
+               (respond-with
+                (:status 404)
+                (:body   "Room not found"))))))
 
 ;; Rest of handlers unchanged since they return plain strings
 (define submit-question-handler
