@@ -156,8 +156,6 @@
 ;; Rest of handlers unchanged since they return plain strings
 (define submit-question-handler
   (handler ((id :>number) (cookies :>cookies)) <- (body :>form)
-           (displayln (hash->list body))
-           (displayln "ARRRRRRRRRRRRRRRRRRRRRRRRRRRRRR")
            (let* ((text (hash-ref body 'text #f))
                   (author (hash-ref body 'author #f))
                   (room (get-room id)))
@@ -166,7 +164,6 @@
              (displayln text)
              (if (and room text)
                (begin
-                 (displayln "-----------------------reating tha qusiton")
                  (create-question! id text author)
                  (respond-with
                   (:status 200)
@@ -176,19 +173,42 @@
                 (:body   "Invalid request"))))))
 
 (define delete-question-handler
-  (handler ((id :>number) (qid :>number)) <- (_ :>)
-           ;; TODO: verify admin and delete
-           (cons 200 "")))
+  (handler ((id :>number) (qid :>number) (cookies :>cookies)) <- (_ :>)
+           (if (is-admin? id cookies)
+             (begin
+               (delete-question! qid id)
+               (respond-with
+                (:status 200)
+                (:body "")))
+             (respond-with
+              (:status 403)
+              (:body "Not authorized")))))
 
 (define upvote-handler
-  (handler ((id :>number) (qid :>number)) <- (_ :>)
-           ;; TODO: record vote in DB
-           (cons 200 "")))
+  (handler ((id :>number) (qid :>number) (cookies :>cookies)) <- (_ :>)
+           (let ((session-id (find-cookie-val cookies "session_id")))
+             (if session-id
+               (begin
+                 (create-vote! session-id qid)
+                 (respond-with
+                  (:status 200)
+                  (:body "")))
+               (respond-with
+                (:status 400)
+                (:body "No session"))))))
 
 (define delete-room-handler
-  (handler ((id :>number)) <- (_ :>)
-           ;; TODO: verify admin and delete
-           (cons 200 "")))
+  (handler ((id :>number) (cookies :>cookies)) <- (_ :>)
+           (let ((room (get-room id)))
+             (if (and room (is-admin? id cookies))
+               (begin
+                 (delete-room! id (room-admin-token room))
+                 (respond-with
+                  (:status 200)
+                  (:body "")))
+               (respond-with
+                (:status 403)
+                (:body "Not authorized"))))))
 
 (define routes
   (list
