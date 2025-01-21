@@ -117,20 +117,20 @@
            (let* ((session-id (find-cookie-val cookies "session_id"))
                   (room (get-room id)))
              (if room
-               (let ((questions (get-room-questions id session-id)))
+               (let* ((questions          (get-room-questions id session-id))
+                      (question-converter (lambda (q)
+                                            (list (question (vector-ref q 0)  ; id
+                                                            (vector-ref q 1)  ; room_id
+                                                            (vector-ref q 2)  ; text
+                                                            (vector-ref q 3)  ; author
+                                                            (vector-ref q 4)) ; created_at
+                                                  (vector-ref q 5)  ; votes
+                                                  (is-admin? id cookies))))
+                      (mapped-questions    (map questions-converter questions))
+                      (questions-template  (questions-list room mapped-questions)))
                  (respond-with
                   (:status 200)
-                  (:body   (render-html
-                            (questions-list room
-                                            (map (lambda (q)
-                                                   (list (question (vector-ref q 0)  ; id
-                                                                   (vector-ref q 1)  ; room_id
-                                                                   (vector-ref q 2)  ; text
-                                                                   (vector-ref q 3)  ; author
-                                                                   (vector-ref q 4)) ; created_at
-                                                         (vector-ref q 5)  ; votes
-                                                         (is-admin? id cookies)))
-                                                 questions))))))
+                  (:body   (render-html questions-template))))
                (respond-with
                 (:status 404)
                 (:body   "Room not found"))))))
