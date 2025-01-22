@@ -65,6 +65,7 @@
                                                            (vector-ref q 3)  ; author
                                                            (vector-ref q 4)) ; created_at
                                                  (vector-ref q 5)  ; votes
+                                                 (vector-ref q 6)  ; voted_by_user (add this)
                                                  (is-admin? id cookies)))
                                          questions)))
              (if room
@@ -125,6 +126,7 @@
                                                             (vector-ref q 3)  ; author
                                                             (vector-ref q 4)) ; created_at
                                                   (vector-ref q 5)  ; votes
+                                                  (vector-ref q 6)  ; voted_by_user (add this)
                                                   (is-admin? id cookies))))
                       (mapped-questions    (map question-converter questions))
                       (questions-template  (questions-list room mapped-questions)))
@@ -214,7 +216,7 @@
    (post   "/r/:id/questions"           submit-question-handler)
    (delete "/r/:id/questions/:qid"      delete-question-handler)
    (post   "/r/:id/questions/:qid/up"   upvote-handler)
-   (delete "/r/:id/questions/:qid/down" delete-vote-handler)
+   (post   "/r/:id/questions/:qid/down" delete-vote-handler)
    (get    "/r/:id/:token"              admin-room-handler)
    ;; TODO: :token vs questions order shouldn't matter, impl in smart-httpd
    (delete "/r/:id"                     delete-room-handler)))
