@@ -16,6 +16,7 @@
         get-room-questions
         delete-question!
         create-vote!
+        delete-vote!
         get-question-votes)
 
 ;; Connection pool management
@@ -146,6 +147,14 @@
                 VALUES (?, ?, datetime('now'))"
                 session-id question-id)
       (catch (e) #f)))))  ; silently fail on duplicate votes
+
+(define (delete-vote! session-id question-id)
+  (with-db
+   (lambda (conn)
+     (sql-eval conn
+               "DELETE FROM vote
+               WHERE session_id = ? AND question_id = ?"
+               session-id question-id))))
 
 (define (get-question-votes question-id)
   (with-db
