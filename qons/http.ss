@@ -126,7 +126,7 @@
                                                             (vector-ref q 4)) ; created_at
                                                   (vector-ref q 5)  ; votes
                                                   (is-admin? id cookies))))
-                      (mapped-questions    (map questions-converter questions))
+                      (mapped-questions    (map question-converter questions))
                       (questions-template  (questions-list room mapped-questions)))
                  (respond-with
                   (:status 200)
@@ -207,16 +207,17 @@
 
 (define routes
   (list
-   (get    "/"                        index-handler)
-   (post   "/r"                       create-room-handler)
-   (get    "/r/:id"                   view-room-handler)
-   (get    "/r/:id/questions"         get-questions-handler)
-   (post   "/r/:id/questions"         submit-question-handler)
-   (delete "/r/:id/questions/:qid"    delete-question-handler)
-   (post   "/r/:id/questions/:qid/up" upvote-handler)
-   (get    "/r/:id/:token"            admin-room-handler)
+   (get    "/"                          index-handler)
+   (post   "/r"                         create-room-handler)
+   (get    "/r/:id"                     view-room-handler)
+   (get    "/r/:id/questions"           get-questions-handler)
+   (post   "/r/:id/questions"           submit-question-handler)
+   (delete "/r/:id/questions/:qid"      delete-question-handler)
+   (post   "/r/:id/questions/:qid/up"   upvote-handler)
+   (delete "/r/:id/questions/:qid/down" delete-vote-handler)
+   (get    "/r/:id/:token"              admin-room-handler)
    ;; TODO: :token vs questions order shouldn't matter, impl in smart-httpd
-   (delete "/r/:id"                   delete-room-handler)))
+   (delete "/r/:id"                     delete-room-handler)))
 
 (define (run-api port host)
   (run-server routes
