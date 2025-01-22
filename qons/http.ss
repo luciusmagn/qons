@@ -179,6 +179,19 @@
                 (:status 400)
                 (:body "No session"))))))
 
+(define delete-vote-handler
+  (handler ((id :>number) (qid :>number) (cookies :>cookies)) <- (_ :>)
+           (let ((session-id (find-cookie-val cookies "session_id")))
+             (if session-id
+               (begin
+                 (delete-vote! session-id qid)
+                 (respond-with
+                  (:status 200)
+                  (:body "")))
+               (respond-with
+                (:status 400)
+                (:body "No session"))))))
+
 (define delete-room-handler
   (handler ((id :>number) (cookies :>cookies)) <- (_ :>)
            (let ((room (get-room id)))
