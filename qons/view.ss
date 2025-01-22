@@ -71,11 +71,17 @@
            (form: hx-post: ,(format "/r/~a/questions" (number->string (room-id room)))
                   hx-swap: "none"
                   hx-target: "#questions"
-                  (textarea: name: "text" required: "")
-                  (input: type: "text"
-                          name: "author"
-                          placeholder: "Name (optional)")
-                  (button: "Ask"))
+                  (dis: style: "display: flex; flex-direction: row;"
+                        (textarea: style: "flex: 1"
+                                   name: "text"
+                                   placeholder: "Ask a question..."
+                                   required: ""))
+                  (div: style: "display: flex; flex-direction: row;"
+                        (input: type: "text"
+                                name: "author"
+                                style: "flex: 1"
+                                placeholder: "Enter your name (optional)")
+                        (button: "Ask")))
            ,(questions-list room questions)))))
 
 ;; Questions list partial (for HTMX updates)
