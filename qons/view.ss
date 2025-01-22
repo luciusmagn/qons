@@ -83,29 +83,33 @@
   (shsx
    (div: id: "questions"
          hx-get: ,(format "/r/~a/questions" (room-id room))
-         hx-trigger: "every 2s, questionAdded from:body"
+         hx-trigger: "every 30000s, questionAdded from:body"
          hx-swap: "outerHTML swap:*"
          class: "questions"
          ,@(map (lambda (qvi)
                   (question-item (room-id room)
                                  (car qvi)     ; question
                                  (cadr qvi)    ; votes
-                                 (caddr qvi))) ; is-admin?
+                                 (caddr qvi)   ; voted?
+                                 (cadddr qvi))) ; is-admin?
                 questions-with-votes))))
 
 ;; Single question item
-(define (question-item room-id q votes is-admin?)
+(define (question-item room-id q votes voted-num is-admin?)
+  (define voted? (not (= voted-num 0)))
   (shsx
-   (div: class: "question"
+   (div: class: "question container"
          id: ,(format "q-~a" (question-id q))
-         (p: ,(question-text q))
          ,(@when (question-author q)
-            (small: ,(question-author q)))
-         (button: hx-post: ,(format "/r/~a/questions/~a/up"
+            (small: class: "q-author" ,(string-append "$ " (question-author q))))
+         (p: ,(question-text q))
+         (button: hx-post: ,(format "/r/~a/questions/~a/~a"
                                     room-id
-                                    (question-id q))
+                                    (question-id q)
+                                    (if voted? "down" "up"))
                   hx-swap: "none"
-                  class: "upvote"
+                  class: ,(string-append "upvote"
+                                         (if voted? " active" ""))
                   "▲ " ,(number->string votes))
          ,(@when is-admin?
             (button: hx-delete: ,(format "/r/~a/questions/~a"

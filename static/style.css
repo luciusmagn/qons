@@ -1,17 +1,3 @@
-/* Question List
-.questions { }
-.question {
-   transition: all 0.2s ease-out;
-}
-
- *
-HTMX Animations
-.htmx-swapping .question {
-   opacity: 0;
-   transform: translateX(-10px);
-}
-
-Forms */
 textarea { }
 input { }
 button { }
@@ -88,5 +74,18 @@ div.qons-input-container {
 }
 
 .upvote.active {
- color: var(lightgreen);
+ color: lightgreen;
+ border-color: lightgreen;
+}
+
+.q-author {
+   color: white;
+   background-color: black;
+   font-family: "Berkelely Mono", monospace;
+   padding: 0.3em;
+}
+
+.question {
+   margin-bottom: 1em;
+   background-color: #fffffa;
 }
