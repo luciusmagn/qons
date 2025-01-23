@@ -40,7 +40,7 @@
                       (input: type: "text"
                               name: "roomId"
                               class: "room-code-input"
-                              placeholder: "room code"
+                              placeholder: "R00M C0DE"
                               pattern: "[0-9]+"
                               required: ""))
                 (div: class: "qons-buttons"

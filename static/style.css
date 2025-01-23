@@ -50,6 +50,7 @@ input.room-code-input {
    font-size: 3em;
    text-align: center;
    font-family: "Berkeley Mono", monospace;
+   font-weight: 100;
 }
 
 div.qons-buttons {
