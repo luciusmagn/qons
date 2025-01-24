@@ -36,7 +36,6 @@ main {
    text-align: left;
    font-weight: 100;
    padding: 1rem;
-   margin-left: 1rem;
    margin-bottom: 1rem;
    margin-top: 0;
    marign-right: 0;
@@ -118,4 +117,8 @@ footer {
 
 .desc p {
    max-width: 700px;
+}
+
+.container {
+   margin-inline: initial !important;
 }
