@@ -31,28 +31,55 @@
    "QONS"
    (shsx
     (main:
-     (section: class: "container"
-               (h1: class: "qons-title"
-                    "Q0NS")
-               (form:
-                class: "qons-code-form"
-                (div: class: "qons-input-container"
-                      (input: type: "text"
-                              name: "roomId"
-                              class: "room-code-input"
-                              placeholder: "R00M C0DE"
-                              pattern: "[0-9]+"
-                              required: ""))
-                (div: class: "qons-buttons"
-                      (button: class: "primary"
-                               onclick: "window.location.href='/r/' + document.querySelector('[name=roomId]').value"
-                               type: "button"
-                               "Join")
-                      (button: hx-post: "/r"
-                               hx-swap: "none"
-                               type: "button"
-                               class: "secondary"
-                               "Create Room"))))))))
+     (h1: class: "qons-title"
+          "'(Q0NS? ...)")
+     (section: class: "container main-qons"
+               (div: style: "display: flex; flex-direction: row"
+                     (div: style: "display: flex; flex-direction: column"
+                           (section: class: "container reset-inline-margin"
+                                     (form:
+                                      class: "qons-code-form"
+                                      (div: class: "qons-input-container"
+                                            (input: type: "text"
+                                                    name: "roomId"
+                                                    class: "room-code-input"
+                                                    placeholder: "R00M C0DE"
+                                                    pattern: "[0-9]+"
+                                                    required: ""))
+                                      (div: class: "qons-buttons"
+                                            (button: class: "primary"
+                                                     onclick: "window.location.href='/r/' + document.querySelector('[name=roomId]').value"
+                                                     type: "button"
+                                                     "Join")
+                                            (button: hx-post: "/r"
+                                                     hx-swap: "none"
+                                                     hx-prompt: "Name your new room:" ;; will be stored in Hx-Prompt header
+                                                     type: "button"
+                                                     class: "secondary"
+                                                     "Create Room"))))
+                           (section: class: "invis-container desc"
+                                     (h3: "Ask answerable questions, get questionable answers")
+                                     (p: "Qons is an anonymous (name optional) Q&A application similar to sli.do")
+                                     (p: "On your first visit, you will be assigned a session ID. Creating a room gives you an access to an admin link. Anyone who clicks this link becomes an admin to this room. If you want to retain long-term admin access to rooms, save this link somewhere safe.")
+                                     (p: "You can lock and unlock rooms as neccessary. Each user can only upvote once.")
+                                     (p: "Inactive rooms are periodically pruned.")
+                                     (p: "Qons is written in Scheme with HTMX and SQLite.")))
+                     (div: style: "display: flex; flex-direction: column"
+                           (section: class: "container"
+                                     (p: "You are the admin of the following rooms:")
+                                     (ul: style: "display: flex; flex-direction: column; padding: 0"
+                                          (li: class: "button" "#283487")
+                                          (li: class: "button" "#283487")
+                                          (li: class: "button" "#283487")
+                                          (li: class: "button" "#283487")))
+                           (section: class: "container" style: "margin-top: 1rem"
+                                     (p: "Recently visited rooms:")
+                                     (ul: style: "display: flex; flex-direction: column; padding: 0"
+                                          (li: class: "button" "#283487")
+                                          (li: class: "button" "#283487")
+                                          (li: class: "button" "#283487")
+                                          (li: class: "button" "#283487")))))
+               (footer: "Made in anno domini 2025, Lukáš Hozda"))))))
 
 ;; Room page
 (define (room-page room questions admin-status?)

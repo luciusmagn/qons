@@ -32,12 +32,18 @@ main {
 
 .qons-title {
    font-family: "Berkeley Mono", monospace;
-   font-size: 10em;
-   text-align: center;
+   font-size: 2rem;
+   text-align: left;
    font-weight: 100;
-   width: 100%;
-   padding: 0;
-   margin: 0;
+   padding: 1rem;
+   margin-left: 1rem;
+   margin-bottom: 1rem;
+   margin-top: 0;
+   marign-right: 0;
+   background-color: #000;
+   color: white;
+   width: fit-content;
+   box-shadow: var(--shadow);
 }
 
 form.qons-code-form {
@@ -46,8 +52,7 @@ form.qons-code-form {
 
 input.room-code-input {
    width: 80%;
-   padding: 0.5em 1em;
-   font-size: 3em;
+   font-size: 1.5em;
    text-align: center;
    font-family: "Berkeley Mono", monospace;
    font-weight: 100;
@@ -63,8 +68,8 @@ div.qons-buttons {
 
 div.qons-buttons button {
    width: 40%;
-   padding: 1.5em 2em;
-   font-size: 1.3em;
+   /*padding: 1.5em 2em;
+   font-size: 1.3em;*/
 }
 
 div.qons-input-container {
@@ -75,8 +80,8 @@ div.qons-input-container {
 }
 
 .upvote.active {
- color: lightgreen;
- border-color: lightgreen;
+   color: lightgreen;
+   border-color: lightgreen;
 }
 
 .q-author {
@@ -89,4 +94,28 @@ div.qons-input-container {
 .question {
    margin-bottom: 1em;
    background-color: #fffffa;
+}
+
+section.main-qons {
+   width: min(100% - 2rem, 70vw);
+}
+
+.invis-container {
+   width: min(100% - 2rem, 70ch);
+}
+
+.reset-inline-margin {
+   margin-inline: initial !important;
+}
+
+footer {
+   text-align: center;
+   font-weight: 70;
+   border-top: dashed 1px black;
+   padding-top: 1rem;
+   margin-top: 1rem;
+}
+
+.desc p {
+   max-width: 700px;
 }
