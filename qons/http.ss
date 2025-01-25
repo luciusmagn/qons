@@ -25,7 +25,7 @@
 
 ;; Create room
 (define create-room-handler
-  (handler () <- (_ :>)
+  (handler ((headers :>headers)) <- (_ :>)
            (define (random-room-id)
              ;; generate id between 100000 and 999999
              (+ 100000 (random-integer 1000000)))
@@ -44,6 +44,7 @@
 
            (let* ((id    (random-room-id))
                   (token (random-token))
+                  (name  (hash-ref (list->hash-table-eqv headers) "Hx-Prompt" "Unnamed room"))
                   (room  (create-room! id token)))
              (respond-with
               (:status 302)

@@ -84,7 +84,7 @@
 ;; Room page
 (define (room-page room questions admin-status?)
   (base-template
-   (format "Room #~a" (room-id room))
+   (format "~a #~a" (room-name room) (room-id room))
    (shsx
     (main: class: "container"
            (h1: "Room #" (span: id: "room-id" ,(number->string (room-id room))))

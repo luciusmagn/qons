@@ -49,9 +49,9 @@
      (sql-eval conn "CREATE TABLE IF NOT EXISTS room (
                     id INTEGER PRIMARY KEY,
                     admin_token TEXT NOT NULL,
+                    name TEXT DEFAULT NULL,
                     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
                     )")
-
      (sql-eval conn "CREATE TABLE IF NOT EXISTS question (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     room_id INTEGER NOT NULL,
@@ -93,7 +93,8 @@
          (let ((r (car result)))
            (room (vector-ref r 0)
                  (vector-ref r 1)
-                 (vector-ref r 2)))))))
+                 (vector-ref r 2)
+                 (vector-ref r 3)))))))
 
 (define (delete-room! id admin-token)
   (with-db

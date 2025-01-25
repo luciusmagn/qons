@@ -9,6 +9,7 @@
   room?
   (id          room-id)
   (admin-token room-admin-token)
+  (name        room-name)
   (created-at  room-created-at))
 
 (define-record-type <question>
