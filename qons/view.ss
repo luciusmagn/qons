@@ -87,7 +87,7 @@
    (format "~a #~a" (room-name room) (room-id room))
    (shsx
     (main: class: "container"
-           (h1: "Room #" (span: id: "room-id" ,(number->string (room-id room))))
+           (h1: ,(format "~a #" (room-name room)) (span: id: "room-id" ,(number->string (room-id room))))
            ,(@when admin-status?
               (p: "You are the admin of this room. Copy its admin link "
                   (a: href: ,(format "/r/~a/~a"

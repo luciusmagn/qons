@@ -73,12 +73,12 @@
                     )"))))
 
 ;; Room operations
-(define (create-room! id admin-token)
+(define (create-room! id admin-token name)
   (with-db
    (lambda (conn)
      (sql-eval conn
-               "INSERT INTO room (id, admin_token, created_at) VALUES (?, ?, datetime('now'))"
-               id admin-token)
+               "INSERT INTO room (id, admin_token, name, created_at) VALUES (?, ?, ?, datetime('now'))"
+               id admin-token name)
      (get-room id))))
 
 (define (get-room id)
@@ -170,7 +170,8 @@
 ;; Room methods
 (define (room.save! self)
   (create-room! (room-id self)
-                (room-admin-token self)))
+                (room-admin-token self)
+                (room-name self)))
 
 (define (room.delete! self)
   (delete-room! (room-id self)

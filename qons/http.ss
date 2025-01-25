@@ -42,10 +42,12 @@
                         acc
                         (string (string-ref chars (random-integer len))))))))
 
-           (let* ((id    (random-room-id))
-                  (token (random-token))
-                  (name  (hash-ref (list->hash-table-eqv headers) "Hx-Prompt" "Unnamed room"))
-                  (room  (create-room! id token)))
+           (let* ((id     (random-room-id))
+                  (token  (random-token))
+                  (prompt (find (lambda (h) (equal? (car h) "Hx-Prompt")) headers))
+                  (room   (create-room! id token (if prompt
+                                                   (cdr prompt)
+                                                   "Unnamed room"))))
              (respond-with
               (:status 302)
               (:header "Location" (format "/r/~a/~a" id token))
@@ -144,9 +146,6 @@
            (let* ((text (hash-ref body 'text #f))
                   (author (hash-ref body 'author #f))
                   (room (get-room id)))
-             (displayln room)
-             (displayln author)
-             (displayln text)
              (if (and room text)
                (begin
                  (create-question! id text author)
