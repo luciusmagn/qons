@@ -109,7 +109,7 @@ div.qons-input-container {
 }
 
 section.main-qons {
-   width: min(100% - 2rem, 70vw);
+   width: min(100% - 2rem, 70ch);
 }
 
 .invis-container {
