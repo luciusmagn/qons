@@ -151,6 +151,7 @@
                  (create-question! id text author)
                  (respond-with
                   (:status 200)
+                  (:header "Hx-Trigger" "questionAdded")
                   (:body   "")))
                (respond-with
                 (:status 400)
