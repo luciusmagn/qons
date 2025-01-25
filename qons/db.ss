@@ -166,37 +166,3 @@
                        question-id))
      (if (null? result) 0
          (vector-ref (car result) 0)))))
-
-;; Room methods
-(define (room.save! self)
-  (create-room! (room-id self)
-                (room-admin-token self)
-                (room-name self)))
-
-(define (room.delete! self)
-  (delete-room! (room-id self)
-                (room-admin-token self)))
-
-(define (room.get id)
-  (get-room id))
-
-(define (room.questions self session-id)
-  (get-room-questions (room-id self) session-id))
-
-;; Question methods
-(define (question.save! self)
-  (create-question! (question-room-id self)
-                    (question-text self)
-                    (question-author self)))
-
-(define (question.delete! self)
-  (delete-question! (question-id self)
-                    (question-room-id self)))
-
-(define (question.votes self)
-  (get-question-votes (question-id self)))
-
-;; Vote methods
-(define (vote.save! self)
-  (create-vote! (vote-session-id self)
-                (vote-question-id self)))
