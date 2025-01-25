@@ -43,6 +43,8 @@ main {
    color: white;
    width: fit-content;
    box-shadow: var(--shadow);
+   text-decoration: none;
+   display: block;
 }
 
 form.qons-code-form {

@@ -50,8 +50,9 @@
    "QONS"
    (shsx
     (main: class: "invis-container"
-           (h1: class: "qons-title"
-                "'(Q0NS? ...)")
+           (a: href: "/"
+               class: "qons-title"
+               "'(Q0NS? ...)")
            (section: class: "container main-qons"
                      (div: style: "display: flex; flex-direction: row"
                            (div: style: "display: flex; flex-direction: column"
@@ -107,8 +108,8 @@
    (shsx
     (main: class: "invis-container"
            (a: href: "/"
-               (h1: class: "qons-title"
-                    "'(Q0NS? ...)"))
+               class: "qons-title"
+               "'(Q0NS? ...)")
            (section: class: "container"
                      (h1: class: "q-title" ,(format "~a #" (room-name room)) (span: id: "room-id" ,(number->string (room-id room))))
                      ,(@when admin-status?
@@ -118,11 +119,12 @@
                                                (room-admin-token room))
                                 "here")
                             "."
-                            (p: "Lock the room: ")
-                            (label: class: "switch"
-                                    (input: type: "checkbox")
-                                    (span: class: "switch-slider"
-                                           (div:)))))
+                            (div: style: "display: flex"
+                                  (span: style: "margin-right: 0.5rem" "Lock the room: ")
+                                  (label: class: "switch"
+                                          (input: type: "checkbox")
+                                          (span: class: "switch-slider"
+                                                 (div:))))))
                      (form: hx-post: ,(format "/r/~a/questions" (number->string (room-id room)))
                             hx-swap: "none"
                             hx-target: "#questions"
