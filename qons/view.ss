@@ -5,6 +5,12 @@
         ./lib)
 (export #t)
 
+;; TODO:
+;;   - list of admin rooms
+;;   - list of visited rooms
+;;   - locking
+;;   - logging in via braiins email token (???)
+
 ;; Base template with common structure
 (define (base-template title content)
   (shsx
@@ -23,6 +29,19 @@
                        evt.detail.shouldSwap = true;
                        evt.detail.idError = false;
                    }
+               });
+
+               function autoResizeTextarea(textarea) {
+                 textarea.style.height = 'auto';
+                 textarea.style.height = `${textarea.scrollHeight}px`;
+               }
+
+               document.addEventListener('DOMContentLoaded', () => {
+                 const textarea = document.querySelector('#question-input');
+                 if (textarea !== null) {
+                      autoResizeTextarea(textarea);
+                      textarea.addEventListener('input', () => autoResizeTextarea(textarea));
+                 }
                });")))))
 
 ;; Index page
@@ -87,20 +106,26 @@
    (format "~a #~a" (room-name room) (room-id room))
    (shsx
     (main: class: "container"
-           (h1: ,(format "~a #" (room-name room)) (span: id: "room-id" ,(number->string (room-id room))))
+           (h1: class: "q-title" ,(format "~a #" (room-name room)) (span: id: "room-id" ,(number->string (room-id room))))
            ,(@when admin-status?
               (p: "You are the admin of this room. Copy its admin link "
                   (a: href: ,(format "/r/~a/~a"
                                      (number->string (room-id room))
                                      (room-admin-token room))
                       "here")
-                  "."))
+                  "."
+                  (p: "Lock the room: ")
+                  (label: class: "switch"
+                          (input: type: "checkbox")
+                          (span: class: "switch-slider"
+                                 (div:)))))
            (form: hx-post: ,(format "/r/~a/questions" (number->string (room-id room)))
                   hx-swap: "none"
                   hx-target: "#questions"
                   (dis: style: "display: flex; flex-direction: row;"
                         (textarea: style: "flex: 1"
                                    name: "text"
+                                   id: "question-input"
                                    placeholder: "Ask a question..."
                                    required: ""))
                   (div: style: "display: flex; flex-direction: row;"
@@ -132,23 +157,30 @@
   (define voted? (not (= voted-num 0)))
   (shsx
    (div: class: "question container"
+         style: "display: flex; flex-direction: row"
          id: ,(format "q-~a" (question-id q))
-         ,(@when (question-author q)
-            (small: class: "q-author" ,(string-append "$ " (question-author q))))
-         (p: ,(question-text q))
-         (button: hx-post: ,(format "/r/~a/questions/~a/~a"
-                                    room-id
-                                    (question-id q)
-                                    (if voted? "down" "up"))
-                  hx-swap: "none"
-                  class: ,(string-append "upvote"
-                                         (if voted? " active" ""))
-                  "▲ " ,(number->string votes))
-         ,(@when is-admin?
-            (button: hx-delete: ,(format "/r/~a/questions/~a"
-                                         room-id
-                                         (question-id q))
-                     hx-swap: "none"
-                     hx-confirm: "Delete this question?"
-                     class: "delete"
-                     "×")))))
+         (div: style: "flex: 1"
+               (div:
+                ,(@when (question-author q)
+                   (small: class: "q-author" ,(string-append "$ " (question-author q))))
+                (span: class: "vote-count"
+                       ,(number->string votes) " " ,(if (= votes 1) "vote" "votes")))
+               (p: style: "word-break: break-word;"
+                   ,(question-text q)))
+         (div: class: "question-controls" style: "display: flex; flex-direction: column; align-items: flex-end"
+               (button: hx-post: ,(format "/r/~a/questions/~a/~a"
+                                          room-id
+                                          (question-id q)
+                                          (if voted? "down" "up"))
+                        hx-swap: "none"
+                        class: ,(string-append "upvote"
+                                               (if voted? " active" ""))
+                        ,(if voted? "▼" "▲"))
+               ,(@when is-admin?
+                  (button: hx-delete: ,(format "/r/~a/questions/~a"
+                                               room-id
+                                               (question-id q))
+                           hx-swap: "none"
+                           hx-confirm: "Delete this question?"
+                           class: "delete"
+                           "×"))))))

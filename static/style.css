@@ -79,19 +79,32 @@ div.qons-input-container {
 }
 
 .upvote.active {
-   color: lightgreen;
-   border-color: lightgreen;
+   color: white;
+   border-color: white;
+   background-color: forestgreen;
 }
 
 .q-author {
    color: white;
    background-color: black;
    font-family: "Berkeley Mono", monospace;
-   padding: 0.3em;
+   padding: 0.3rem;
+   margin-right: 0.5rem;
+}
+
+.q-title {
+   font-family: "Berkeley Mono", monospace;
+}
+
+.vote-count {
+   font-family: "Berkeley Mono", monospace;
+   font-weight: 100;
+   padding: 0.3rem;
+   border: solid 1px black;
 }
 
 .question {
-   margin-bottom: 1em;
+   margin-bottom: 1rem;
    background-color: #fffffa;
 }
 
@@ -121,4 +134,10 @@ footer {
 
 .container {
    margin-inline: initial !important;
+}
+
+.question-controls button {
+   padding: 0;
+   width: 1.5rem;
+   height: 1.5rem;
 }
