@@ -146,16 +146,25 @@
            (let* ((text (hash-ref body 'text #f))
                   (author (hash-ref body 'author #f))
                   (room (get-room id)))
-             (if (and room text)
-               (begin
-                 (create-question! id text author)
-                 (respond-with
-                  (:status 200)
-                  (:header "Hx-Trigger" "questionsModified")
-                  (:body   "")))
+             (cond
+              ((not room)
+               (respond-with
+                (:status 404)
+                (:body "Room not found")))
+              ((room-locked room)
+               (respond-with
+                (:status 403)
+                (:body "Room is locked")))
+              ((not text)
                (respond-with
                 (:status 400)
-                (:body   "Invalid request"))))))
+                (:body "Question text required")))
+              (else
+               (create-question! id text author)
+               (respond-with
+                (:status 200)
+                (:header "Hx-Trigger" "questionsModified")
+                (:body "")))))))
 
 (define delete-question-handler
   (handler ((id :>number) (qid :>number) (cookies :>cookies)) <- (_ :>)
@@ -210,11 +219,26 @@
                 (:status 403)
                 (:body "Not authorized"))))))
 
+(define toggle-lock-handler
+  (handler ((id :>number) (cookies :>cookies)) <- (body :>form)
+           (let* ((locked? (equal? "true" (hash-ref body 'locked #f)))
+                  (room (get-room id)))
+             (if (and room (is-admin? id cookies))
+               (begin
+                 (set-room-lock! id (room-admin-token room) locked?)
+                 (respond-with
+                  (:status 200)
+                  (:body "")))
+               (respond-with
+                (:status 403)
+                (:body "Not authorized"))))))
+
 (define routes
   (list
    (get    "/"                          index-handler)
    (post   "/r"                         create-room-handler)
    (get    "/r/:id"                     view-room-handler)
+   (post   "/r/:id/lock"                toggle-lock-handler)
    (get    "/r/:id/questions"           get-questions-handler)
    (post   "/r/:id/questions"           submit-question-handler)
    (delete "/r/:id/questions/:qid"      delete-question-handler)

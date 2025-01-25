@@ -82,6 +82,13 @@
                id admin-token name)
      (get-room id))))
 
+(define (set-room-lock! id admin-token locked?)
+  (with-db
+   (lambda (conn)
+     (sql-eval conn
+               "UPDATE room SET locked = ? WHERE id = ? AND admin_token = ?"
+               (if locked? 1 0) id admin-token))))
+
 (define (get-room id)
   (with-db
    (lambda (conn)

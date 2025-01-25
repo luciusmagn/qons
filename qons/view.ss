@@ -107,11 +107,9 @@
    (format "~a #~a" (room-name room) (room-id room))
    (shsx
     (main: class: "invis-container"
-           (a: href: "/"
-               class: "qons-title"
-               "'(Q0NS? ...)")
+           ;; ... other content ...
            (section: class: "container"
-                     (h1: class: "q-title" ,(format "~a #" (room-name room)) (span: id: "room-id" ,(number->string (room-id room))))
+                     ;; ... other content ...
                      ,(@when admin-status?
                         (p: "You are the admin of this room. Copy its admin link "
                             (a: href: ,(format "/r/~a/~a"
@@ -122,24 +120,17 @@
                             (div: style: "display: flex"
                                   (span: style: "margin-right: 0.5rem" "Lock the room: ")
                                   (label: class: "switch"
-                                          (input: type: "checkbox")
+                                          (input: type: "checkbox"
+                                                  checked: ,(room-locked room)
+                                                  hx-post: ,(format "/r/~a/lock" (room-id room))
+                                                  hx-swap: "none"
+                                                  hx-vals: "js:{locked: event.target.checked}")
                                           (span: class: "switch-slider"
                                                  (div:))))))
-                     (form: hx-post: ,(format "/r/~a/questions" (number->string (room-id room)))
-                            hx-swap: "none"
-                            hx-target: "#questions"
-                            (dis: style: "display: flex; flex-direction: row;"
-                                  (textarea: style: "flex: 1"
-                                             name: "text"
-                                             id: "question-input"
-                                             placeholder: "Ask a question..."
-                                             required: ""))
-                            (div: style: "display: flex; flex-direction: row;"
-                                  (input: type: "text"
-                                          name: "author"
-                                          style: "flex: 1"
-                                          placeholder: "Enter your name (optional)")
-                                  (button: "Ask")))
+                     ;; Only show form when room is not locked
+                     ,(@unless (room-locked room)
+                        (form: hx-post: ,(format "/r/~a/questions" (number->string (room-id room)))))
+                     ;; ... rest of form ...))
                      ,(questions-list room questions))))))
 
 ;; Questions list partial (for HTMX updates)
