@@ -164,11 +164,11 @@
          style: "display: flex; flex-direction: row"
          id: ,(format "q-~a" (question-id q))
          (div: style: "flex: 1"
-               (div:
-                ,(@when (question-author q)
-                   (small: class: "q-author" ,(string-append "$ " (question-author q))))
-                (span: class: "vote-count"
-                       ,(number->string votes) " " ,(if (= votes 1) "vote" "votes")))
+               (div: style: "display: flex;"
+                     ,(@when (question-author q)
+                        (small: class: "q-author" ,(string-append "$ " (question-author q))))
+                     (span: class: "vote-count"
+                            ,(number->string votes) " " ,(if (= votes 1) "vote" "votes")))
                (p: style: "word-break: break-word;"
                    ,(question-text q)))
          (div: class: "question-controls" style: "display: flex; flex-direction: column; align-items: flex-end"
@@ -185,6 +185,6 @@
                                                room-id
                                                (question-id q))
                            hx-swap: "none"
-                           hx-confirm: "Delete this question?"
+                           hx-confirm: "Remove this question?"
                            class: "delete"
-                           "×"))))))
+                           "✓"))))))

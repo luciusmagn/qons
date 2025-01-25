@@ -90,6 +90,11 @@ div.qons-input-container {
    font-family: "Berkeley Mono", monospace;
    padding: 0.3rem;
    margin-right: 0.5rem;
+   display: inline-block;
+   max-width: 250px;
+   white-space: nowrap;
+   overflow: hidden;
+   text-overflow: ellipsis;
 }
 
 .q-title {
