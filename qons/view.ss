@@ -116,7 +116,7 @@
   (shsx
    (div: id: "questions"
          hx-get: ,(format "/r/~a/questions" (room-id room))
-         hx-trigger: "every 10s, questionAdded from:body"
+         hx-trigger: "every 10s, questionsModified from:body"
          hx-swap: "outerHTML swap:*"
          class: "questions"
          ,@(map (lambda (qvi)

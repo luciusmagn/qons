@@ -151,7 +151,7 @@
                  (create-question! id text author)
                  (respond-with
                   (:status 200)
-                  (:header "Hx-Trigger" "questionAdded")
+                  (:header "Hx-Trigger" "questionsModified")
                   (:body   "")))
                (respond-with
                 (:status 400)
@@ -177,6 +177,7 @@
                  (create-vote! session-id qid)
                  (respond-with
                   (:status 200)
+                  (:header "Hx-Trigger" "questionsModified")
                   (:body "")))
                (respond-with
                 (:status 400)
@@ -190,6 +191,7 @@
                  (delete-vote! session-id qid)
                  (respond-with
                   (:status 200)
+                  (:header "Hx-Trigger" "questionsModified")
                   (:body "")))
                (respond-with
                 (:status 400)
