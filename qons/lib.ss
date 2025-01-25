@@ -5,11 +5,12 @@
 (export #t)
 
 (define-record-type <room>
-  (room id admin-token created-at)
+  (room id admin-token name locked created-at)
   room?
   (id          room-id)
   (admin-token room-admin-token)
   (name        room-name)
+  (locked      room-locked)
   (created-at  room-created-at))
 
 (define-record-type <question>

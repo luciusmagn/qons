@@ -50,6 +50,7 @@
                     id INTEGER PRIMARY KEY,
                     admin_token TEXT NOT NULL,
                     name TEXT DEFAULT NULL,
+                    locked BOOLEAN NOT NULL DEFAULT 0,
                     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
                     )")
      (sql-eval conn "CREATE TABLE IF NOT EXISTS question (
@@ -77,7 +78,7 @@
   (with-db
    (lambda (conn)
      (sql-eval conn
-               "INSERT INTO room (id, admin_token, name, created_at) VALUES (?, ?, ?, datetime('now'))"
+               "INSERT INTO room (id, admin_token, name, created_at) VALUES (?, ?, ?, 0, datetime('now'))"
                id admin-token name)
      (get-room id))))
 
@@ -94,7 +95,8 @@
            (room (vector-ref r 0)
                  (vector-ref r 1)
                  (vector-ref r 2)
-                 (vector-ref r 3)))))))
+                 (vector-ref r 3)
+                 (vector-ref r 4)))))))
 
 (define (delete-room! id admin-token)
   (with-db
