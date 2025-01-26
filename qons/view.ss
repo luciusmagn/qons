@@ -2,28 +2,27 @@
 (import :std/sugar
         :std/format
         :lho/shsx/lib
+        :lho/fxns/lib
         ./lib)
 (export #t)
 
 ;; TODO:
-;;   - list of admin rooms
 ;;   - list of visited rooms
-;;   - locking
 ;;   - logging in via braiins email token (???)
 
 ;; Base template with common structure
-(define (base-template title content)
-  (shsx
-   (html:
-    (head:
-     (title: ,title)
-     (meta: charset: "utf-8")
-     (script: src: "https://unpkg.com/htmx.org@1.9.10")
-     (link: rel: "stylesheet" href: "https://cdn.jsdelivr.net/gh/luciusmagn/berkeley-css/dist/berkeley.css")
-     (link: rel: "stylesheet" href: "/static/style.css"))
-    (body:
-     ,content
-     (script: "// This part of code is copied from https://stackoverflow.com/a/73593579
+(fn :ret base-template ((title : string?) (content : any?) -> any?)
+    (shsx
+     (html:
+      (head:
+       (title: ,title)
+       (meta: charset: "utf-8")
+       (script: src: "https://unpkg.com/htmx.org@1.9.10")
+       (link: rel: "stylesheet" href: "https://cdn.jsdelivr.net/gh/luciusmagn/berkeley-css/dist/berkeley.css")
+       (link: rel: "stylesheet" href: "/static/style.css"))
+      (body:
+       ,content
+       (script: "// This part of code is copied from https://stackoverflow.com/a/73593579
                document.body.addEventListener('htmx:beforeOnLoad', function(evt) {
                    if (evt.detail.xhr.status >= 300 && evt.detail.xhr.status < 500) {
                        evt.detail.shouldSwap = true;
@@ -45,68 +44,68 @@
                });")))))
 
 ;; Index page
-(define (index-page admin-rooms)
-  (base-template
-   "QONS"
-   (shsx
-    (main: class: "invis-container"
-           (a: href: "/"
-               class: "qons-title"
-               "'(Q0NS? ...)")
-           (section: class: "container main-qons"
-                     (div: style: "display: flex; flex-direction: row"
-                           (div: style: "display: flex; flex-direction: column"
-                                 (section: class: "container reset-inline-margin"
-                                           (form:
-                                            class: "qons-code-form"
-                                            (div: class: "qons-input-container"
-                                                  (input: type: "text"
-                                                          name: "roomId"
-                                                          class: "room-code-input"
-                                                          placeholder: "R00M C0DE"
-                                                          pattern: "[0-9]+"
-                                                          required: ""))
-                                            (div: class: "qons-buttons"
-                                                  (button: class: "primary"
-                                                           onclick: "window.location.href='/r/' + document.querySelector('[name=roomId]').value"
-                                                           type: "button"
-                                                           "Join")
-                                                  (button: hx-post: "/r"
-                                                           hx-swap: "none"
-                                                           hx-prompt: "Name your new room:"
-                                                           type: "button"
-                                                           class: "secondary"
-                                                           "Create Room"))))
-                                 (section: class: "invis-container desc"
-                                           (h3: "Ask answerable questions, get questionable answers")
-                                           (p: "Qons is an anonymous (name optional) Q&A application similar to sli.do")
-                                           (p: "On your first visit, you will be assigned a session ID. Creating a room gives you an access to an admin link. Anyone who clicks this link becomes an admin to this room. If you want to retain long-term admin access to rooms, save this link somewhere safe.")
-                                           (p: "You can lock and unlock rooms as neccessary. Each user can only upvote once.")
-                                           (p: "Inactive rooms are periodically pruned.")
-                                           (p: "Qons is written in Scheme with HTMX and SQLite.")))
-                           (div: style: "display: flex; flex-direction: column"
-                                 (section: class: "container"
-                                           (p: "You are the admin of the following rooms:")
-                                           (ul: style: "display: flex; flex-direction: column; padding: 0"
-                                                ,@(map (lambda (room-pair)
-                                                         (let ((id (car room-pair))
-                                                               (room (cdr room-pair)))
-                                                           (shsx
-                                                            (li: style: "list-style-type: none"
-                                                                 (a: href: ,(format "/r/~a" id)
-                                                                     class: "button"
-                                                                     ,(format "#~a - ~a"
-                                                                              id
-                                                                              (room-name room)))))))
-                                                       admin-rooms)))
-                                 (section: class: "container" style: "margin-top: 1rem"
-                                           (p: "Recently visited rooms:")
-                                           (ul: style: "display: flex; flex-direction: column; padding: 0"
-                                                (li: class: "button" "#283487")
-                                                (li: class: "button" "#283487")
-                                                (li: class: "button" "#283487")
-                                                (li: class: "button" "#283487")))))
-                     (footer: "Made in anno domini 2025, Lukáš Hozda"))))))
+(fn :ret index-page ((admin-rooms : (list-of (pair-of number? room?))) -> any?)
+    (base-template
+     "QONS"
+     (shsx
+      (main: class: "invis-container"
+             (a: href: "/"
+                 class: "qons-title"
+                 "'(Q0NS? ...)")
+             (section: class: "container main-qons"
+                       (div: style: "display: flex; flex-direction: row"
+                             (div: style: "display: flex; flex-direction: column"
+                                   (section: class: "container reset-inline-margin"
+                                             (form:
+                                              class: "qons-code-form"
+                                              (div: class: "qons-input-container"
+                                                    (input: type: "text"
+                                                            name: "roomId"
+                                                            class: "room-code-input"
+                                                            placeholder: "R00M C0DE"
+                                                            pattern: "[0-9]+"
+                                                            required: ""))
+                                              (div: class: "qons-buttons"
+                                                    (button: class: "primary"
+                                                             onclick: "window.location.href='/r/' + document.querySelector('[name=roomId]').value"
+                                                             type: "button"
+                                                             "Join")
+                                                    (button: hx-post: "/r"
+                                                             hx-swap: "none"
+                                                             hx-prompt: "Name your new room:"
+                                                             type: "button"
+                                                             class: "secondary"
+                                                             "Create Room"))))
+                                   (section: class: "invis-container desc"
+                                             (h3: "Ask answerable questions, get questionable answers")
+                                             (p: "Qons is an anonymous (name optional) Q&A application similar to sli.do")
+                                             (p: "On your first visit, you will be assigned a session ID. Creating a room gives you an access to an admin link. Anyone who clicks this link becomes an admin to this room. If you want to retain long-term admin access to rooms, save this link somewhere safe.")
+                                             (p: "You can lock and unlock rooms as neccessary. Each user can only upvote once.")
+                                             (p: "Inactive rooms are periodically pruned.")
+                                             (p: "Qons is written in Scheme with HTMX and SQLite.")))
+                             (div: style: "display: flex; flex-direction: column"
+                                   (section: class: "container"
+                                             (p: "You are the admin of the following rooms:")
+                                             (ul: style: "display: flex; flex-direction: column; padding: 0"
+                                                  ,@(map (lambda (room-pair)
+                                                           (let ((id (car room-pair))
+                                                                 (room (cdr room-pair)))
+                                                             (shsx
+                                                              (li: style: "list-style-type: none"
+                                                                   (a: href: ,(format "/r/~a" id)
+                                                                       class: "button"
+                                                                       ,(format "#~a - ~a"
+                                                                                id
+                                                                                (room-name room)))))))
+                                                         admin-rooms)))
+                                   (section: class: "container" style: "margin-top: 1rem"
+                                             (p: "Recently visited rooms:")
+                                             (ul: style: "display: flex; flex-direction: column; padding: 0"
+                                                  (li: class: "button" "#283487")
+                                                  (li: class: "button" "#283487")
+                                                  (li: class: "button" "#283487")
+                                                  (li: class: "button" "#283487")))))
+                       (footer: "Made in anno domini 2025, Lukáš Hozda"))))))
 
 
 ;; Room page - question form
