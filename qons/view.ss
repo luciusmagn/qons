@@ -45,7 +45,7 @@
                });")))))
 
 ;; Index page
-(define (index-page)
+(define (index-page admin-rooms)
   (base-template
    "QONS"
    (shsx
@@ -73,7 +73,7 @@
                                                            "Join")
                                                   (button: hx-post: "/r"
                                                            hx-swap: "none"
-                                                           hx-prompt: "Name your new room:" ;; will be stored in Hx-Prompt header
+                                                           hx-prompt: "Name your new room:"
                                                            type: "button"
                                                            class: "secondary"
                                                            "Create Room"))))
@@ -88,10 +88,17 @@
                                  (section: class: "container"
                                            (p: "You are the admin of the following rooms:")
                                            (ul: style: "display: flex; flex-direction: column; padding: 0"
-                                                (li: class: "button" "#283487")
-                                                (li: class: "button" "#283487")
-                                                (li: class: "button" "#283487")
-                                                (li: class: "button" "#283487")))
+                                                ,@(map (lambda (room-pair)
+                                                         (let ((id (car room-pair))
+                                                               (room (cdr room-pair)))
+                                                           (shsx
+                                                            (li: style: "list-style-type: none"
+                                                                 (a: href: ,(format "/r/~a" id)
+                                                                     class: "button"
+                                                                     ,(format "#~a - ~a"
+                                                                              id
+                                                                              (room-name room)))))))
+                                                       admin-rooms)))
                                  (section: class: "container" style: "margin-top: 1rem"
                                            (p: "Recently visited rooms:")
                                            (ul: style: "display: flex; flex-direction: column; padding: 0"
@@ -100,6 +107,7 @@
                                                 (li: class: "button" "#283487")
                                                 (li: class: "button" "#283487")))))
                      (footer: "Made in anno domini 2025, Lukáš Hozda"))))))
+
 
 ;; Room page - question form
 (define (question-form room-id locked?)

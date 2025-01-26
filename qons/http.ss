@@ -15,13 +15,25 @@
 ;; index handler just sets session cookie if not present
 (define index-handler
   (handler ((cookies :>cookies)) <- (body :>)
-           (let ((session-id (or (find-cookie-val cookies "session_id")
-                                 (uuid->string (random-uuid)))))
+           (let* ((session-id (or (find-cookie-val cookies "session_id")
+                                  (uuid->string (random-uuid))))
+                  (admin-cookie (find-cookie-val cookies "admin_rooms"))
+                  (admin-rooms (if admin-cookie
+                                 (try (string->json-object admin-cookie)
+                                      (catch (e) (hash)))
+                                 (hash)))
+                  ;; Get room details for each admin room
+                  (admin-room-details
+                   (filter-map (lambda (room-pair)
+                                 (let* ((id (string->number (symbol->string (car room-pair))))
+                                        (room (get-room id)))
+                                   (and room (cons id room))))
+                               (hash->list admin-rooms))))
              (respond-with
               (:status 200)
               (:header "HX-Refresh" "true")
               (:cookie "session_id" session-id)
-              (:body (render-html (index-page)))))))
+              (:body (render-html (index-page admin-room-details)))))))
 
 ;; Create room
 (define create-room-handler
