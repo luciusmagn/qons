@@ -45,7 +45,7 @@
                });")))))
 
 ;; Index page
-(fn :ret index-page ((admin-rooms : (list-of (pair-of number? room?))) -> any?)
+(fn :ret index-page ((admin-rooms : (list-of (pair-of number? room?))) (recent-rooms : (list-of room?)) -> any?)
     (base-template
      "QONS"
      (shsx
@@ -88,6 +88,7 @@
                                    (section: class: "container"
                                              (p: "You are the admin of the following rooms:")
                                              (ul: style: "display: flex; flex-direction: column; padding: 0"
+                                                  class: "list-buttons"
                                                   ,@(map (lambda (room-pair)
                                                            (let ((id (car room-pair))
                                                                  (room (cdr room-pair)))
@@ -95,17 +96,19 @@
                                                               (li: style: "list-style-type: none"
                                                                    (a: href: ,(format "/r/~a" id)
                                                                        class: "button"
-                                                                       ,(format "#~a - ~a"
-                                                                                id
-                                                                                (room-name room)))))))
+                                                                       ,(substring (room-name room) 0 10))))))
                                                          admin-rooms)))
                                    (section: class: "container" style: "margin-top: 1rem"
                                              (p: "Recently visited rooms:")
                                              (ul: style: "display: flex; flex-direction: column; padding: 0"
-                                                  (li: class: "button" "#283487")
-                                                  (li: class: "button" "#283487")
-                                                  (li: class: "button" "#283487")
-                                                  (li: class: "button" "#283487")))))
+                                                  class: "list-buttons"
+                                                  ,@(map (lambda (room)
+                                                           (shsx
+                                                            (li: style: "list-style-type: none"
+                                                                 (a: href: ,(format "/r/~a" (room-id room))
+                                                                     class: "button"
+                                                                     ,(substring (room-name room) 0 10)))))
+                                                         recent-rooms)))))
                        (footer: "Made anno domini 2025, Lukáš Hozda"))))))
 
 

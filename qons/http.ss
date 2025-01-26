@@ -15,14 +15,20 @@
 ;; index handler just sets session cookie if not present
 (define index-handler
   (handler ((cookies :>cookies)) <- (body :>)
-           (let* ((session-id   (or (find-cookie-val cookies "session_id")
-                                    (uuid->string (random-uuid))))
-                  (admin-cookie (find-cookie-val cookies "admin_rooms"))
-                  (admin-rooms  (if admin-cookie
-                                  (try (string->json-object admin-cookie)
-                                       (catch (e) (hash)))
-                                  (hash)))
-                  ;; Get room details for each admin room
+           (let* ((session-id    (or (find-cookie-val cookies "session_id")
+                                     (uuid->string (random-uuid))))
+                  (admin-cookie  (find-cookie-val cookies "admin_rooms"))
+                  (recent-cookie (find-cookie-val cookies "recent_rooms"))
+                  (admin-rooms   (if admin-cookie
+                                   (try (string->json-object admin-cookie)
+                                        (catch (e) (hash)))
+                                   (hash)))
+                  (recent-ids    (if recent-cookie
+                                   (try (map string->number
+                                             (string->json-object recent-cookie))
+                                        (catch (e) '()))
+                                   '()))
+                  (recent-rooms  (filter-map get-room recent-ids))
                   (admin-room-details
                    (filter-map (lambda (room-pair)
                                  (let* ((id (string->number (symbol->string (car room-pair))))
@@ -33,7 +39,7 @@
               (:status 200)
               (:header "HX-Refresh" "true")
               (:cookie "session_id" session-id)
-              (:body (render-html (index-page admin-room-details)))))))
+              (:body (render-html (index-page admin-room-details recent-rooms)))))))
 
 ;; Create room
 (define create-room-handler
@@ -72,27 +78,31 @@
   (handler ((id :>number) (cookies :>cookies)) <- (_ :>)
            (let* ((session-id       (or (find-cookie-val cookies "session_id")
                                         (uuid->string (random-uuid))))
-                  (room             (get-room id))
-                  (questions        (get-room-questions id session-id))
-                  ;; TODO: what will happen if room don't exist?
-                  (mapped-questions (map (lambda (q)
-                                           (list (question (vector-ref q 0)  ; id
-                                                           (vector-ref q 1)  ; room_id
-                                                           (vector-ref q 2)  ; text
-                                                           (vector-ref q 3)  ; author
-                                                           (vector-ref q 4)) ; created_at
-                                                 (vector-ref q 5)  ; votes
-                                                 (vector-ref q 6)  ; voted_by_user (add this)
-                                                 (is-admin? id cookies)))
-                                         questions)))
+                  (room            (get-room id))
+                  (questions       (get-room-questions id session-id))
+                  (mapped-questions
+                   (map (lambda (q)
+                          (list (question (vector-ref q 0)
+                                          (vector-ref q 1)
+                                          (vector-ref q 2)
+                                          (vector-ref q 3)
+                                          (vector-ref q 4))
+                                (vector-ref q 5)
+                                (vector-ref q 6)
+                                (is-admin? id cookies)))
+                        questions))
+                  (recent-rooms    (if room
+                                     (update-recent-rooms id cookies)
+                                     '())))
              (if room
                (let ((admin-status (is-admin? id cookies)))
                  (respond-with
                   (:status 200)
+                  (:cookie "recent_rooms" (rooms->cookie recent-rooms))
                   (:body (render-html (room-page room mapped-questions admin-status)))))
                (respond-with
                 (:status 404)
-                (:body "No such room foo"))))))
+                (:body "No such room"))))))
 
 ;; Admin access to room
 (define admin-room-handler
