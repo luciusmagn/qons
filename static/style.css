@@ -164,8 +164,10 @@ footer {
 
 .q-title-text {
    font-size: 2rem;
+   font-family: "Berkeley Mono", monospace;
 }
 
 .q-title-id {
    font-size: 1.5rem;
+   font-family: "Berkeley Mono", monospace;
 }
