@@ -153,7 +153,9 @@
                                   (span: style: "margin-right: 0.5rem" "Lock the room: ")
                                   (label: class: "switch"
                                           (input: type: "checkbox"
-                                                  checked: ,(eqv? 1 (room-locked room))
+                                                  ,@(if (eqv? 1 (room-locked room))
+                                                      '(checked: "true")
+                                                      '())
                                                   hx-post: ,(format "/r/~a/lock" (room-id room))
                                                   hx-swap: "none"
                                                   hx-vals: "js:{locked: event.target.checked}")
