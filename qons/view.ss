@@ -145,7 +145,9 @@
                             (span: class: "q-title-text" ,(format "~a #" (room-name room)))
                             (span: class: "q-title-id"   id: "room-id" ,(number->string (room-id room))))
                            (div: class: "small-buttons"
-                                 (button: "🔗 Share")
+                                 (button:
+                                  onclick: "navigator.clipboard.writeText(window.location.href).then(() => alert('Link copied to clipboard!'))"
+                                  "🔗 Share")
                                  (button: "🗑️ Delete")))
                      ,(@when admin-status?
                         (p: "You are the admin of this room. Copy its admin link "
