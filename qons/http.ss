@@ -45,9 +45,11 @@
            (let* ((id     (random-room-id))
                   (token  (random-token))
                   (prompt (find (lambda (h) (equal? (car h) "Hx-Prompt")) headers))
+                  (deaaa  (displayln "creating room"))
                   (room   (create-room! id token (if prompt
                                                    (cdr prompt)
                                                    "Unnamed room"))))
+             (displayln "eeeeeeee")
              (respond-with
               (:status 302)
               (:header "Location" (format "/r/~a/~a" id token))
@@ -121,24 +123,31 @@
            (let* ((session-id (find-cookie-val cookies "session_id"))
                   (room (get-room id)))
              (if room
-               (let* ((questions          (get-room-questions id session-id))
-                      (question-converter (lambda (q)
-                                            (list (question (vector-ref q 0)  ; id
-                                                            (vector-ref q 1)  ; room_id
-                                                            (vector-ref q 2)  ; text
-                                                            (vector-ref q 3)  ; author
-                                                            (vector-ref q 4)) ; created_at
-                                                  (vector-ref q 5)  ; votes
-                                                  (vector-ref q 6)  ; voted_by_user (add this)
-                                                  (is-admin? id cookies))))
-                      (mapped-questions    (map question-converter questions))
-                      (questions-template  (questions-list room mapped-questions)))
+               (let* ((questions (get-room-questions id session-id))
+                      (question-converter
+                       (lambda (q)
+                         (list (question (vector-ref q 0)
+                                         (vector-ref q 1)
+                                         (vector-ref q 2)
+                                         (vector-ref q 3)
+                                         (vector-ref q 4))
+                               (vector-ref q 5)
+                               (vector-ref q 6)
+                               (is-admin? id cookies))))
+                      (mapped-questions (map question-converter questions))
+                      (questions-template (questions-list room mapped-questions)))
                  (respond-with
                   (:status 200)
-                  (:body   (render-html questions-template))))
+                  (:header "Content-Type" "text/html")
+                  (:body (string-append
+                          (render-html questions-template)
+                          "<div hx-swap-oob=\"true\" id=\"question-form\">"
+                          (render-html (question-form (room-id room)
+                                                      (= 1 (room-locked room))))
+                          "</div>"))))
                (respond-with
                 (:status 404)
-                (:body   "Room not found"))))))
+                (:body "Room not found"))))))
 
 ;; Rest of handlers unchanged since they return plain strings
 (define submit-question-handler
@@ -151,7 +160,7 @@
                (respond-with
                 (:status 404)
                 (:body "Room not found")))
-              ((room-locked room)
+              ((= 1 (room-locked room))
                (respond-with
                 (:status 403)
                 (:body "Room is locked")))
@@ -228,6 +237,7 @@
                  (set-room-lock! id (room-admin-token room) locked?)
                  (respond-with
                   (:status 200)
+                  (:header "Hx-Trigger" "questionsModified")
                   (:body "")))
                (respond-with
                 (:status 403)

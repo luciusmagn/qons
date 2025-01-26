@@ -101,15 +101,39 @@
                                                 (li: class: "button" "#283487")))))
                      (footer: "Made in anno domini 2025, Lukáš Hozda"))))))
 
-;; Room page
+;; Room page - question form
+(define (question-form room-id locked?)
+  (shsx
+   (div: id: "question-form"
+         ,(@if locked?
+            (p: class: "locked-message" "This room is locked - no new questions can be added")
+            (form: hx-post: ,(format "/r/~a/questions" (number->string room-id))
+                   hx-swap: "none"
+                   hx-target: "#questions"
+                   (dis: style: "display: flex; flex-direction: row;"
+                         (textarea: style: "flex: 1"
+                                    name: "text"
+                                    id: "question-input"
+                                    placeholder: "Ask a question..."
+                                    required: ""))
+                   (div: style: "display: flex; flex-direction: row;"
+                         (input: type: "text"
+                                 name: "author"
+                                 style: "flex: 1"
+                                 placeholder: "Enter your name (optional)")
+                         (button: "Ask")))))))
+
+;; Room page - main template
 (define (room-page room questions admin-status?)
   (base-template
    (format "~a #~a" (room-name room) (room-id room))
    (shsx
     (main: class: "invis-container"
-           ;; ... other content ...
+           (a: href: "/"
+               class: "qons-title"
+               "'(Q0NS? ...)")
            (section: class: "container"
-                     ;; ... other content ...
+                     (h1: class: "q-title" ,(format "~a #" (room-name room)) (span: id: "room-id" ,(number->string (room-id room))))
                      ,(@when admin-status?
                         (p: "You are the admin of this room. Copy its admin link "
                             (a: href: ,(format "/r/~a/~a"
@@ -121,16 +145,13 @@
                                   (span: style: "margin-right: 0.5rem" "Lock the room: ")
                                   (label: class: "switch"
                                           (input: type: "checkbox"
-                                                  checked: ,(room-locked room)
+                                                  checked: ,(eqv? 1 (room-locked room))
                                                   hx-post: ,(format "/r/~a/lock" (room-id room))
                                                   hx-swap: "none"
                                                   hx-vals: "js:{locked: event.target.checked}")
                                           (span: class: "switch-slider"
                                                  (div:))))))
-                     ;; Only show form when room is not locked
-                     ,(@unless (room-locked room)
-                        (form: hx-post: ,(format "/r/~a/questions" (number->string (room-id room)))))
-                     ;; ... rest of form ...))
+                     ,(question-form (room-id room) (eqv? 1 (room-locked room)))
                      ,(questions-list room questions))))))
 
 ;; Questions list partial (for HTMX updates)
@@ -143,15 +164,19 @@
          class: "questions"
          ,@(map (lambda (qvi)
                   (question-item (room-id room)
-                                 (car qvi)     ; question
-                                 (cadr qvi)    ; votes
-                                 (caddr qvi)   ; voted?
-                                 (cadddr qvi))) ; is-admin?
+                                 (car qvi)      ; question
+                                 (cadr qvi)     ; votes
+                                 (caddr qvi)    ; voted?
+                                 (cadddr qvi)   ; is-admin?
+                                 (room-locked room))) ; pass locked status
                 questions-with-votes))))
 
+
+
 ;; Single question item
-(define (question-item room-id q votes voted-num is-admin?)
+(define (question-item room-id q votes voted-num is-admin? locked-num)
   (define voted? (not (= voted-num 0)))
+  (define locked? (= locked-num 1))
   (shsx
    (div: class: "question container"
          style: "display: flex; flex-direction: row"
@@ -165,14 +190,15 @@
                (p: style: "word-break: break-word;"
                    ,(question-text q)))
          (div: class: "question-controls" style: "display: flex; flex-direction: column; align-items: flex-end"
-               (button: hx-post: ,(format "/r/~a/questions/~a/~a"
-                                          room-id
-                                          (question-id q)
-                                          (if voted? "down" "up"))
-                        hx-swap: "none"
-                        class: ,(string-append "upvote"
-                                               (if voted? " active" ""))
-                        ,(if voted? "▼" "▲"))
+               ,(@unless locked? ; Only show vote button if room not locked
+                  (button: hx-post: ,(format "/r/~a/questions/~a/~a"
+                                             room-id
+                                             (question-id q)
+                                             (if voted? "down" "up"))
+                           hx-swap: "none"
+                           class: ,(string-append "upvote"
+                                                  (if voted? " active" ""))
+                           ,(if voted? "▼" "▲")))
                ,(@when is-admin?
                   (button: hx-delete: ,(format "/r/~a/questions/~a"
                                                room-id

@@ -10,6 +10,7 @@
 (export init-db!
         with-db
         create-room!
+        set-room-lock!
         get-room
         delete-room!
         create-question!
@@ -78,7 +79,7 @@
   (with-db
    (lambda (conn)
      (sql-eval conn
-               "INSERT INTO room (id, admin_token, name, created_at) VALUES (?, ?, ?, 0, datetime('now'))"
+               "INSERT INTO room (id, admin_token, name, locked, created_at) VALUES (?, ?, ?, 0, datetime('now'))"
                id admin-token name)
      (get-room id))))
 
