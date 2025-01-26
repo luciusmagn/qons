@@ -84,7 +84,7 @@
                  id admin-token name)
        (get-room id))))
 
-(fn :ret set-room-lock! ((id : number?) (admin-token : string?) (locked? : integer?) -> void?)
+(fn :ret set-room-lock! ((id : number?) (admin-token : string?) (locked? : boolean?) -> void?)
     (with-db
      (lambda (conn)
        (sql-eval conn
