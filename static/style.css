@@ -101,6 +101,9 @@ div.qons-input-container {
 
 .q-title {
    font-family: "Berkeley Mono", monospace;
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
 }
 
 .vote-count {
@@ -147,4 +150,22 @@ footer {
    padding: 0;
    width: 1.5rem;
    height: 1.5rem;
+}
+
+
+.small-buttons {
+   display: inline-flex;
+   flex-direction: row;
+   justify-content: flex-end;
+}
+.small-buttons button {
+   padding: 0.3rem;
+}
+
+.q-title-text {
+   font-size: 2rem;
+}
+
+.q-title-id {
+   font-size: 1.5rem;
 }
