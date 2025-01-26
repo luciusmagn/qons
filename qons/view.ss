@@ -105,7 +105,7 @@
                                                   (li: class: "button" "#283487")
                                                   (li: class: "button" "#283487")
                                                   (li: class: "button" "#283487")))))
-                       (footer: "Made in anno domini 2025, Lukáš Hozda"))))))
+                       (footer: "Made anno domini 2025, Lukáš Hozda"))))))
 
 
 ;; Room page - question form
