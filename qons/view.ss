@@ -9,6 +9,7 @@
 ;; TODO:
 ;;   - list of visited rooms
 ;;   - logging in via braiins email token (???)
+;;   - XSS
 
 ;; Base template with common structure
 (fn :ret base-template ((title : string?) (content : any?) -> any?)
@@ -148,7 +149,12 @@
                                  (button:
                                   onclick: "navigator.clipboard.writeText(window.location.href).then(() => alert('Link copied to clipboard!'))"
                                   "🔗 Share")
-                                 (button: "🗑️ Delete")))
+                                 ,(@when admin-status?
+                                    (button: hx-delete: ,(format "/r/~a" (room-id room))
+                                             hx-confirm: "Delete this room and all its questions?"
+                                             hx-target: "body"
+                                             hx-push-url: "/"
+                                             "🗑️ Delete"))))
                      ,(@when admin-status?
                         (p: "You are the admin of this room. Copy its admin link "
                             (a: href: ,(format "/r/~a/~a"

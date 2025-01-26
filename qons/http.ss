@@ -236,6 +236,7 @@
                  (delete-room! id (room-admin-token room))
                  (respond-with
                   (:status 200)
+                  (:header "HX-Redirect" "/")
                   (:body "")))
                (respond-with
                 (:status 403)
