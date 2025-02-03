@@ -148,6 +148,13 @@
                             (span: class: "q-title-id"   id: "room-id" ,(number->string (room-id room))))
                            (div: class: "small-buttons"
                                  (button:
+                                  onclick: ,(string-append "navigator.clipboard.writeText("
+                                                           (format "'/r/~a/~a'"
+                                                                   (number->string (room-id room))
+                                                                   (room-admin-token room))
+                                                           ").then(() => alert('Admin link copied to clipboard! Don\\'t show it to miscreants'))")
+                                  "💾 Save admin")
+                                 (button:
                                   onclick: "navigator.clipboard.writeText(window.location.href).then(() => alert('Link copied to clipboard!'))"
                                   "🔗 Share")
                                  ,(@when admin-status?
@@ -157,12 +164,7 @@
                                              hx-push-url: "/"
                                              "🗑️ Delete"))))
                      ,(@when admin-status?
-                        (p: "You are the admin of this room. Copy its admin link "
-                            (a: href: ,(format "/r/~a/~a"
-                                               (number->string (room-id room))
-                                               (room-admin-token room))
-                                "here")
-                            "."
+                        (p: "You are an admin of this room. Have fun."
                             (div: style: "display: flex"
                                   (span: style: "margin-right: 0.5rem" "Lock the room: ")
                                   (label: class: "switch"
