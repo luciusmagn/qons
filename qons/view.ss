@@ -111,26 +111,26 @@
 
 
 ;; Room page - question form
-(define (question-form room-id locked?)
-  (shsx
-   (div: id: "question-form"
-         ,(@if locked?
-            (p: class: "locked-message" "This room is locked - no new questions can be added")
-            (form: hx-post: ,(format "/r/~a/questions" (number->string room-id))
-                   hx-swap: "none"
-                   hx-target: "#questions"
-                   (dis: style: "display: flex; flex-direction: row;"
-                         (textarea: style: "flex: 1"
-                                    name: "text"
-                                    id: "question-input"
-                                    placeholder: "Ask a question..."
-                                    required: ""))
-                   (div: style: "display: flex; flex-direction: row;"
-                         (input: type: "text"
-                                 name: "author"
-                                 style: "flex: 1"
-                                 placeholder: "Enter your name (optional)")
-                         (button: "Ask")))))))
+(fn :ret question-form ((room-id : number?) (locked? : boolean?) -> any?)
+    (shsx
+     (div: id: "question-form"
+           ,(@if locked?
+              (p: class: "locked-message" "This room is locked - no new questions can be added")
+              (form: hx-post: ,(format "/r/~a/questions" (number->string room-id))
+                     hx-swap: "none"
+                     hx-target: "#questions"
+                     (dis: style: "display: flex; flex-direction: row;"
+                           (textarea: style: "flex: 1"
+                                      name: "text"
+                                      id: "question-input"
+                                      placeholder: "Ask a question..."
+                                      required: ""))
+                     (div: style: "display: flex; flex-direction: row;"
+                           (input: type: "text"
+                                   name: "author"
+                                   style: "flex: 1"
+                                   placeholder: "Enter your name (optional)")
+                           (button: "Ask")))))))
 
 ;; Room page - main template
 (define (room-page room questions admin-status?)
