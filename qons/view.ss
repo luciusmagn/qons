@@ -7,9 +7,7 @@
 (export #t)
 
 ;; TODO:
-;;   - list of visited rooms
 ;;   - logging in via braiins email token (???)
-;;   - XSS
 
 ;; Base template with common structure
 (fn :ret base-template ((title : string?) (content : any?) -> any?)
@@ -196,7 +194,6 @@
                                  (cadddr qvi)   ; is-admin?
                                  (room-locked room))) ; pass locked status
                 questions-with-votes))))
-
 
 
 ;; Single question item
