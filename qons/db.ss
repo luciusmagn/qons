@@ -117,7 +117,7 @@
     (void))
 
 ;; Question operations
-(fn :ret create-question! ((room-id : number?) (text : string?) (author : string?) -> void?)
+(fn :ret create-question! ((room-id : number?) (text : string?) (author : (or-t string? boolean?)) -> void?)
     (with-db
      (lambda (conn)
        (sql-eval conn
