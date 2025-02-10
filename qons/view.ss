@@ -94,7 +94,7 @@
                                                               (li: style: "list-style-type: none"
                                                                    (a: href: ,(format "/r/~a" id)
                                                                        class: "button"
-                                                                       ,(substring (room-name room) 0 10))))))
+                                                                       ,(sanitize (substring (room-name room) 0 10)))))))
                                                          admin-rooms)))
                                    (section: class: "container" style: "margin-top: 1rem"
                                              (p: "Recently visited rooms:")
@@ -105,7 +105,7 @@
                                                             (li: style: "list-style-type: none"
                                                                  (a: href: ,(format "/r/~a" (room-id room))
                                                                      class: "button"
-                                                                     ,(substring (room-name room) 0 10)))))
+                                                                     ,(sanitize (substring (room-name room) 0 10))))))
                                                          recent-rooms)))))
                        (footer: "Made anno domini 2025, Lukáš Hozda"))))))
 
@@ -144,7 +144,7 @@
            (section: class: "container"
                      (div: class: "q-title"
                            (div:
-                            (span: class: "q-title-text" ,(format "~a #" (room-name room)))
+                            (span: class: "q-title-text" ,(sanitize (format "~a #" (room-name room))))
                             (span: class: "q-title-id"   id: "room-id" ,(number->string (room-id room))))
                            (div: class: "small-buttons"
                                  (button:
@@ -209,11 +209,11 @@
          (div: style: "flex: 1"
                (div: style: "display: flex;"
                      ,(@when (question-author q)
-                        (small: class: "q-author" ,(string-append "$ " (question-author q))))
+                        (small: class: "q-author" ,(sanitize (string-append "$ " (question-author q)))))
                      (span: class: "vote-count"
                             ,(number->string votes) " " ,(if (= votes 1) "vote" "votes")))
                (p: style: "word-break: break-word;"
-                   ,(question-text q)))
+                   ,(sanitize (question-text q))))
          (div: class: "question-controls" style: "display: flex; flex-direction: column; align-items: flex-end"
                ,(@unless locked? ; Only show vote button if room not locked
                   (button: hx-post: ,(format "/r/~a/questions/~a/~a"
