@@ -21,7 +21,6 @@
     (displayln "Starting QONS on " host ":" port)
     (run-api port host)))
 
-;; Add database option to main
 (define (main . args)
   (call-with-getopt qons-main args
                     program: "qons"

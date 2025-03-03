@@ -57,18 +57,18 @@
                                    (displayln e)
                                    '()))
                             '()))
-           ;; Remove duplicates and add new id at front
+           ;; remove duplicates and add new id at front
            (updated-ids (merciful-take (remove-duplicates
                                         (cons new-id recent-ids))
                                        max-recent-rooms))
-           ;; Get room details for each id
+           ;; get room details for each id
            (rooms       (filter-map get-room updated-ids)))
       rooms))
 
 (fn :ret rooms->cookie ((rooms : (list-of room?)) -> string?)
     (call-with-output-string
-     (cut write-json
-          (list->vector
-           (map (lambda (r) (number->string (room-id r)))
-                rooms))
-          <>)))
+      (cut write-json
+           (list->vector
+            (map (lambda (r) (number->string (room-id r)))
+                 rooms))
+           <>)))

@@ -10,7 +10,7 @@
 ;;   - logging in via braiins email token (???)
 
 ;; Base template with common structure
-(fn :ret base-template ((title : string?) (content : any?) -> any?)
+(fn :ret base-template ((title : string?) (content : any?) -> shsx-template?)
     (shsx
      (html:
       (head:
@@ -43,7 +43,7 @@
                });")))))
 
 ;; Index page
-(fn :ret index-page ((admin-rooms : (list-of (pair-of number? room?))) (recent-rooms : (list-of room?)) -> any?)
+(fn :ret index-page ((admin-rooms : (list-of (pair-of number? room?))) (recent-rooms : (list-of room?)) -> shsx-template?)
     (base-template
      "QONS"
      (shsx
